@@ -28,6 +28,8 @@
 /*Individual column header label text*/
 #song_table .column-header .label {
     -fx-text-fill : white;
+    -fx-alignment : center-left;
+    -fx-padding   : 10 15;
 }
 
 /*Global background header bar*/
@@ -38,7 +40,7 @@
 
 #song_table .table-cell {
     -fx-border-color : transparent;
-    -fx-padding: 10 15;
+    -fx-padding      : 10 15;
 }
 
 #song_table .table-row-cell {
@@ -57,6 +59,15 @@
     -fx-background-color : rgb(74, 74, 74);
 }
 
+#song_table .table-row-cell:selected {
+    -fx-background-color : rgb(114, 41, 41);
+}
+
+#song_table .table-row-cell:selected:hover,
+#song_table .table-row-cell:pressed {
+    -fx-background-color : rgb(76, 25, 25);
+}
+
 #song_table .table-row-cell:pressed {
     -fx-background-color : rgb(121, 121, 121);
 }
@@ -67,6 +78,18 @@
     -fx-padding : 2;
 }
 
+#song_table .virtual-flow .scroll-bar:horizontal,
+#song_table .virtual-flow .scroll-bar:horizontal .track,
+#song_table .virtual-flow .scroll-bar:horizontal .thumb {
+    -fx-background-color  : transparent;
+    -fx-background-radius : 0;
+    -fx-border-radius     : 0;
+    -fx-padding           : 0;
+    -fx-background-insets : 0;
+    -fx-pref-height       : 0;
+
+}
+
 #song_table .virtual-flow .scroll-bar:vertical,
 #song_table .virtual-flow .scroll-bar:vertical .track {
     -fx-background-color : transparent;
@@ -74,12 +97,4 @@
 
 #song_table .virtual-flow .scroll-bar:vertical .thumb {
     -fx-background-color : #585858;
-}
-
-#duration_column {
-    /*-fx-alignment : bottom-center;*/
-}
-
-#song_table .table-column {
-    /*-fx-alignment: bottom-right;*/
 }

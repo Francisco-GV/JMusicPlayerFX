@@ -1,7 +1,7 @@
 package com.frank.jmusicplayerfx;
 
 import com.frank.jmusicplayerfx.media.AudioLoader;
-import javafx.animation.FadeTransition;
+
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
@@ -19,7 +19,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +32,7 @@ public class JMusicPlayerFX extends Application {
     public void init() {
         instance = this;
         audioLoader = new AudioLoader();
-        File musicDirFile = new File(System.getProperty("user.home").concat("\\Music\\Example"));
+        File musicDirFile = new File(System.getProperty("user.home").concat("\\Music"));
         audioLoader.addNewDirectory(musicDirFile);
 
         mainGUILoaderTask = new Task<>() {
@@ -75,7 +74,7 @@ public class JMusicPlayerFX extends Application {
         pane.getChildren().add(label);
         Scene scene = new Scene(pane);
 
-        mainStage.setTitle("JMusicPlayerFX - Version Pre-Alpha");
+        mainStage.setTitle("JMusicPlayerFX");
         mainStage.setWidth(875);
         mainStage.setHeight(580);
         mainStage.setScene(scene);

@@ -1,8 +1,5 @@
 package com.frank.jmusicplayerfx.media;
 
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
