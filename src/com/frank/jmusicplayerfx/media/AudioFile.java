@@ -28,10 +28,8 @@ public class AudioFile {
         durationFormated = new SimpleStringProperty("00:00");
         duration = new SimpleObjectProperty<>(Duration.seconds(0));
 
-        long start = System.currentTimeMillis();
         Media media = new Media(file.toURI().toString());
         this.mediaPlayer = new MediaPlayer(media);
-
 
         mediaPlayer.statusProperty().addListener((obs, old, newValue) -> {
             if (newValue == MediaPlayer.Status.READY) {
@@ -42,10 +40,6 @@ public class AudioFile {
                 album.bind(Bindings.valueAt(metadata, "album").asString());
                 duration.bind(Bindings.createObjectBinding(media::getDuration));
                 durationFormated.bind(Bindings.createStringBinding(() -> formatTime(media.getDuration())));
-
-                long end = System.currentTimeMillis();
-
-                System.out.println("Time: " + (end - start) / 1000.0 + " s");
             }
         });
     }
@@ -60,6 +54,12 @@ public class AudioFile {
 
         return stringMinutes + ":" + stringSeconds;
     }
+
+    @Override
+    public String toString() {
+        return getTitle();
+    }
+
 
     public MediaPlayer getMediaPlayer() {
         return mediaPlayer;
