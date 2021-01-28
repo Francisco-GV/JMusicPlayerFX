@@ -1,10 +1,10 @@
 package com.frank.jmusicplayerfx;
 
 import com.frank.jmusicplayerfx.media.AudioLoader;
-
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -19,19 +19,22 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-
 import java.io.File;
 import java.io.IOException;
 
 public class JMusicPlayerFX extends Application {
-    private static JMusicPlayerFX instance;
+    private final String APP_TITLE = "JMusicPlayerFX";
+
+    private Stage mainStage;
     private AudioLoader audioLoader;
+    private GlobalPlayer globalPlayer;
     private Task<Scene> mainGUILoaderTask;
 
     @Override
     public void init() {
-        instance = this;
         audioLoader = new AudioLoader();
+        globalPlayer = new GlobalPlayer();
+
         File musicDirFile = new File(System.getProperty("user.home").concat("\\Music"));
         audioLoader.addNewDirectory(musicDirFile);
 
@@ -46,8 +49,9 @@ public class JMusicPlayerFX extends Application {
 
     @Override
     public void start(Stage mainStage) {
+        this.mainStage = mainStage;
         mainStage.addEventHandler(WindowEvent.WINDOW_SHOWING,
-            windowEvent -> BackgroundTasker.executeTask(mainGUILoaderTask,
+            windowEvent -> BackgroundTasker.executeGUITaskOnce(mainGUILoaderTask,
                     workerStateEvent -> {
                 Scene scene = mainGUILoaderTask.getValue();
                 Pane pane = (Pane) scene.getRoot();
@@ -65,6 +69,7 @@ public class JMusicPlayerFX extends Application {
         FlowPane pane = new FlowPane();
         pane.setAlignment(Pos.TOP_CENTER);
         pane.setBackground(new Background(fill));
+        pane.setPadding(new Insets(10, 10, 10, 10));
 
         Image imgLoad = new Image(getClass().getResourceAsStream("/resources/images/loading.gif"), 25, 25, true, true);
         Label label = new Label("Loading...", new ImageView(imgLoad));
@@ -74,7 +79,7 @@ public class JMusicPlayerFX extends Application {
         pane.getChildren().add(label);
         Scene scene = new Scene(pane);
 
-        mainStage.setTitle("JMusicPlayerFX");
+        mainStage.setTitle(APP_TITLE);
         mainStage.setWidth(875);
         mainStage.setHeight(580);
         mainStage.setScene(scene);
@@ -82,15 +87,45 @@ public class JMusicPlayerFX extends Application {
         mainStage.centerOnScreen();
     }
 
+    public void setTitle(String text) {
+        mainStage.setTitle(text + "  |  " + APP_TITLE);
+    }
+
+    public void resetTitle() {
+        mainStage.setTitle(APP_TITLE);
+    }
+
     public AudioLoader getAudioLoader() {
         return audioLoader;
+    }
+
+    public GlobalPlayer getGlobalPlayer() {
+        return globalPlayer;
     }
 
     public static void main(String[] args) {
         Application.launch(args);
     }
 
+    private static JMusicPlayerFX instance;
     public static JMusicPlayerFX getInstance() {
         return instance;
+    }
+    /*
+        To access te Application object created by JavaFX Runtime, I decided to use a singleton pattern, but
+        this class must have a public constructor to create that object. So I will throw a exception to prevent
+        further attempts to create an object. It's synchronized to prevent that many threads attempt to access
+        to this constructor. Although due the way that JavaFX works, probably this never will be necessary.
+        But, hey, it's ok make sure of that. Certainly this won't avoid the creation of new objects but throw
+        the exception will avoid the override of the first object.
+        .
+        TL;DR: Weird shit that probably never will be necessary, just ignore it.
+    */
+    public JMusicPlayerFX() {
+        synchronized (JMusicPlayerFX.class) {
+            if (instance != null) throw new UnsupportedOperationException(getClass()
+                    + " uses a singleton pattern and there's already an instance created.");
+            instance = this;
+        }
     }
 }
