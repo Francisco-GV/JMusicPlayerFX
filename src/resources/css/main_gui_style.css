@@ -36,18 +36,27 @@
 }
 
 #btn_hide_menu_box {
-    -fx-pref-width       : 15;
-    -fx-pref-height      : -fx-pref-width;
-    -fx-padding          : 0;
-    -fx-background-color : white;
+    -fx-pref-width        : 150;
+    -fx-pref-height       : 40;
+    -fx-padding           : 0;
+    -fx-background-color  : transparent;
+    -fx-border-radius     : 0;
+    -fx-background-radius : 0;
 }
 
 #btn_hide_menu_box:hover {
-    -fx-background-color : #c8c8c8;
+    -fx-background-color : rgba(0, 0, 0, 0.2);
 }
 
 #btn_hide_menu_box:pressed {
-    -fx-background-color : #969696;
+    -fx-background-color : rgba(0, 0, 0, 0.4);
+}
+
+#btn_hide_menu_box .label {
+    -fx-pref-width       : 15;
+    -fx-pref-height      : 15;
+    -fx-background-color : white;
+    -fx-content-display  : graphic-only;
 }
 
 #left_menu_sections {
@@ -69,16 +78,16 @@
 }
 
 #left_menu_sections > .button.button_selected {
-    -fx-background-color: #853131;
-    -fx-font-weight: bold;
+    -fx-background-color : #853131;
+    -fx-font-weight      : bold;
 }
 
 #left_menu_sections > .button.button_selected:hover {
-    -fx-background-color: #9b3f3f;
+    -fx-background-color : #9b3f3f;
 }
 
 #left_menu_sections > .button.button_selected:pressed {
-    -fx-background-color: #ac4e4e;
+    -fx-background-color : #ac4e4e;
 }
 
 #left_menu_sections > .button > .svg_path_btn {
@@ -139,6 +148,8 @@
     -fx-max-width         : -fx-pref-width;
     -fx-max-height        : -fx-pref-width;
 
+    -fx-padding           : 0;
+
     -fx-font-size         : 26;
     -fx-text-fill         : white;
     -fx-background-color  : transparent;
@@ -159,6 +170,17 @@
 #btn_player_play:pressed {
     -fx-text-fill    : #6e6e6e;
     -fx-border-color : #6e6e6e;
+}
+
+#btn_player_play .label {
+    -fx-pref-width  : 16;
+    -fx-pref-height : -fx-pref-width;
+    -fx-min-width   : -fx-pref-width;
+    -fx-min-height  : -fx-pref-width;
+    -fx-max-width   : -fx-pref-width;
+    -fx-max-height  : -fx-pref-width;
+
+    -fx-background-color: white;
 }
 
 #btn_player_control_left {

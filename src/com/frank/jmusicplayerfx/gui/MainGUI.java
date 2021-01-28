@@ -26,7 +26,7 @@ import java.util.List;
 public class MainGUI {
     @FXML private Pane leftMenu;
     @FXML private Pane leftMenuSections;
-    @FXML private Button btnHideMenu;
+    @FXML private Label graphicBtnHideMenu;
     @FXML private Label lblTitleContent;
     @FXML private ScrollPane scrollpaneContent;
 
@@ -65,13 +65,13 @@ public class MainGUI {
     @FXML private void initialize() {
         sizeTimeline = new Timeline();
 
-        btnHideMenu.setShape(buttonLeftSVG);
+        graphicBtnHideMenu.setShape(buttonLeftSVG);
         leftMenuMinimize = false;
         leftMenu.setPrefWidth(leftMenu.getMaxWidth());
 
         setContentView("Loading...", null);
 
-        BackgroundTasker.executeTask(musicPaneLoaderTask, e -> {
+        BackgroundTasker.executeGUITaskOnce(musicPaneLoaderTask, e -> {
             musicPane = musicPaneLoaderTask.getValue();
             setContentView(TITLE_SONGS, musicPane);
             selectFirstButton();
@@ -102,7 +102,7 @@ public class MainGUI {
             shape = buttonRightSVG;
             leftMenuMinimize = true;
         }
-        btnHideMenu.setShape(shape);
+        graphicBtnHideMenu.setShape(shape);
         sizeTimeline.getKeyFrames().add(frame);
         sizeTimeline.play();
     }

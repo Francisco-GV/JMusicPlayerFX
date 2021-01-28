@@ -31,11 +31,11 @@
         </HBox>
     </top>
     <left>
-        <VBox id="left_menu_box" fx:id="leftMenu" alignment="TOP_CENTER" maxWidth="125.0" minWidth="75.0" prefWidth="125.0" spacing="10.0" BorderPane.alignment="CENTER">
-            <padding>
-                <Insets top="10.0" />
-            </padding>
-            <Button id="btn_hide_menu_box" fx:id="btnHideMenu" mnemonicParsing="false" onAction="#minimizeLeftMenu" />
+        <VBox id="left_menu_box" fx:id="leftMenu" alignment="TOP_CENTER" maxWidth="125.0" minWidth="50.0" prefWidth="125.0" BorderPane.alignment="CENTER">
+            <Button id="btn_hide_menu_box" mnemonicParsing="false" onAction="#minimizeLeftMenu">
+            <graphic>
+               <Label fx:id="graphicBtnHideMenu" text="Label" />
+            </graphic></Button>
             <VBox id="left_menu_sections" fx:id="leftMenuSections" alignment="TOP_CENTER" prefWidth="100.0">
                 <Button id="btn_songs" mnemonicParsing="false" onAction="#openSection" text="Songs">
                     <graphic>
@@ -67,7 +67,7 @@
     </left>
     <bottom>
         <AnchorPane BorderPane.alignment="CENTER">
-            <fx:include source="main_gui_player.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" BorderPane.alignment="CENTER" />
+            <fx:include source="bottom_player.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" BorderPane.alignment="CENTER" />
         </AnchorPane>
     </bottom>
     <center>

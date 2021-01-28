@@ -6,10 +6,6 @@
     -fx-text-fill : white;
 }
 
-#song_table .column-resize-line {
-    -fx-background-color : red;
-}
-
 /*Top right corner above scroll-bar*/
 #song_table .column-header-background .filler {
     -fx-background-color : transparent;
@@ -45,6 +41,11 @@
 
 #song_table .table-row-cell {
     -fx-text-background-color : white;
+}
+
+#song_table .playing {
+    -fx-text-background-color : #de9a9a;
+    -fx-font-size: 105%;
 }
 
 #song_table .table-row-cell:odd {
