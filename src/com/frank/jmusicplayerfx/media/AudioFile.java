@@ -9,7 +9,6 @@ import javafx.collections.ObservableMap;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
-
 import java.io.File;
 
 @SuppressWarnings("unused")
@@ -57,7 +56,7 @@ public class AudioFile {
 
     @Override
     public String toString() {
-        return getTitle();
+        return getTitle() + " - " + getArtist();
     }
 
 
