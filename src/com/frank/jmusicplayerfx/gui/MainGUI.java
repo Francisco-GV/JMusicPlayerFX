@@ -81,7 +81,7 @@ public class MainGUI {
     @FXML private void minimizeLeftMenu() {
         KeyFrame frame;
         KeyValue value;
-        Duration duration = Duration.millis(75);
+        Duration duration = Duration.millis(125);
         SVGPath shape;
 
         sizeTimeline.stop();

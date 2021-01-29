@@ -1,5 +1,7 @@
 package com.frank.jmusicplayerfx.media;
 
+import static com.frank.jmusicplayerfx.Util.formatTime;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -43,29 +45,17 @@ public class AudioFile {
         });
     }
 
-    private String formatTime(Duration duration) {
-        double totalSeconds = duration.toSeconds();
-        int minutes = (int) totalSeconds / 60;
-        int seconds = (int) totalSeconds % 60;
-
-        String stringMinutes = (minutes < 10) ? "0" + minutes : String.valueOf(minutes);
-        String stringSeconds = (seconds < 10) ? "0" + seconds : String.valueOf(seconds);
-
-        return stringMinutes + ":" + stringSeconds;
-    }
-
     @Override
     public String toString() {
         return getTitle() + " - " + getArtist();
     }
-
 
     public MediaPlayer getMediaPlayer() {
         return mediaPlayer;
     }
 
     public static String[] EXTENSIONS = new String[]{
-            "mp3", "aiff", "wav", "mpeg4"
+            "mp3", "wav"
     };
 
     public String getTitle() {

@@ -12,11 +12,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class AudioLoader {
     private final List<Directory> directories;
 
-    private static final FilenameFilter extensionFilter;
     private static final FileFilter directoryFilter;
+    private static final FilenameFilter extensionFilter;
     private final Timer loaderTimer;
 
     static {
+        directoryFilter = File::isDirectory;
         extensionFilter = (dir, name) -> {
             for (String extension : AudioFile.EXTENSIONS) {
                 if (name.toLowerCase().endsWith(extension.toLowerCase())) {
@@ -25,8 +26,6 @@ public class AudioLoader {
             }
             return false;
         };
-
-        directoryFilter = File::isDirectory;
     }
 
     public AudioLoader() {

@@ -44,8 +44,8 @@
 }
 
 #song_table .playing {
-    -fx-text-background-color : #de9a9a;
-    -fx-font-size: 105%;
+    -fx-text-background-color : #e76363;
+    -fx-font-size: 110%;
 }
 
 #song_table .table-row-cell:odd {
@@ -62,6 +62,7 @@
 
 #song_table .table-row-cell:selected {
     -fx-background-color : rgb(114, 41, 41);
+    -fx-text-background-color : white;
 }
 
 #song_table .table-row-cell:selected:hover,

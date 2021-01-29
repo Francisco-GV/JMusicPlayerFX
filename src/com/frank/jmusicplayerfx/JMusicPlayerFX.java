@@ -10,8 +10,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.FlowPane;
@@ -19,6 +17,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -50,19 +49,17 @@ public class JMusicPlayerFX extends Application {
     @Override
     public void start(Stage mainStage) {
         this.mainStage = mainStage;
-        mainStage.addEventHandler(WindowEvent.WINDOW_SHOWING,
-            windowEvent -> BackgroundTasker.executeGUITaskOnce(mainGUILoaderTask,
-                    workerStateEvent -> {
-                Scene scene = mainGUILoaderTask.getValue();
-                Pane pane = (Pane) scene.getRoot();
-                mainStage.setMinWidth(pane.getMinWidth());
-                mainStage.setMinHeight(pane.getMinHeight() + 38);
+        mainStage.addEventHandler(WindowEvent.WINDOW_SHOWING, windowEvent ->
+                BackgroundTasker.executeGUITaskOnce(mainGUILoaderTask, workerStateEvent -> {
+            Scene scene = mainGUILoaderTask.getValue();
+            Pane pane = (Pane) scene.getRoot();
+            mainStage.setMinWidth(pane.getMinWidth());
+            mainStage.setMinHeight(pane.getMinHeight() + 38);
 
-                scene.setFill(Color.rgb(33, 33, 33));
+            scene.setFill(Color.rgb(33, 33, 33));
 
-                mainStage.setScene(scene);
-            })
-        );
+            mainStage.setScene(scene);
+        }));
 
         BackgroundFill fill = new BackgroundFill(Color.rgb(20, 20, 20), null, null);
 
@@ -71,8 +68,7 @@ public class JMusicPlayerFX extends Application {
         pane.setBackground(new Background(fill));
         pane.setPadding(new Insets(10, 10, 10, 10));
 
-        Image imgLoad = new Image(getClass().getResourceAsStream("/resources/images/loading.gif"), 25, 25, true, true);
-        Label label = new Label("Loading...", new ImageView(imgLoad));
+        Label label = new Label("Loading...");
         label.setContentDisplay(ContentDisplay.TOP);
         label.setTextFill(Color.WHITE);
 
@@ -103,14 +99,20 @@ public class JMusicPlayerFX extends Application {
         return globalPlayer;
     }
 
+    public Stage getMainStage() {
+        return mainStage;
+    }
+
+    private static JMusicPlayerFX instance;
+
     public static void main(String[] args) {
         Application.launch(args);
     }
 
-    private static JMusicPlayerFX instance;
     public static JMusicPlayerFX getInstance() {
         return instance;
     }
+
     /*
         To access te Application object created by JavaFX Runtime, I decided to use a singleton pattern, but
         this class must have a public constructor to create that object. So I will throw a exception to prevent
@@ -123,8 +125,9 @@ public class JMusicPlayerFX extends Application {
     */
     public JMusicPlayerFX() {
         synchronized (JMusicPlayerFX.class) {
-            if (instance != null) throw new UnsupportedOperationException(getClass()
-                    + " uses a singleton pattern and there's already an instance created.");
+            if (instance != null)
+                throw new UnsupportedOperationException(getClass() +
+                        " uses a singleton pattern and there's already an instance created.");
             instance = this;
         }
     }

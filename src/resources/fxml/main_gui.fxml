@@ -31,7 +31,7 @@
         </HBox>
     </top>
     <left>
-        <VBox id="left_menu_box" fx:id="leftMenu" alignment="TOP_CENTER" maxWidth="125.0" minWidth="50.0" prefWidth="125.0" BorderPane.alignment="CENTER">
+        <VBox id="left_menu_box" fx:id="leftMenu" alignment="TOP_CENTER" BorderPane.alignment="CENTER">
             <Button id="btn_hide_menu_box" mnemonicParsing="false" onAction="#minimizeLeftMenu">
             <graphic>
                <Label fx:id="graphicBtnHideMenu" text="Label" />

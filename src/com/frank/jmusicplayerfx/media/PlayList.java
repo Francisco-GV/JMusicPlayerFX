@@ -2,7 +2,6 @@ package com.frank.jmusicplayerfx.media;
 
 import java.util.List;
 
-@SuppressWarnings("unused")
 public class PlayList {
     private String name;
     private List<AudioFile> audioFiles;
@@ -21,6 +20,14 @@ public class PlayList {
 
     public void setAudioFiles(List<AudioFile> audioFiles) {
         this.audioFiles = audioFiles;
+    }
+
+    public AudioFile get(int index) {
+        return audioFiles.get(index);
+    }
+
+    public int indexOf(AudioFile audioFile) {
+        return audioFiles.indexOf(audioFile);
     }
 
     public List<AudioFile> getAudioFiles() {
