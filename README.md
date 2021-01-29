@@ -3,6 +3,8 @@
 ## About
 **JMusicPlayerFX** is an simple open-source audio player made using Java and JavaFX library.
 
+![image](https://user-images.githubusercontent.com/54688495/106233458-36703000-61bc-11eb-8eff-82c89c7f40d0.png)
+
 ## Features
 * All audio files from all directories are shown in the table within the music section.
 * The metadata contained in the media files is shown in the table songs.
