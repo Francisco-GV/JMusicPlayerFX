@@ -3,10 +3,10 @@ package com.frank.jmusicplayerfx;
 import com.frank.jmusicplayerfx.media.AudioFile;
 import com.frank.jmusicplayerfx.media.PlayList;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.media.MediaPlayer;
-import javafx.util.Duration;
+
+import static com.frank.jmusicplayerfx.JMusicPlayerFX.getInstance;
 
 public final class GlobalPlayer {
     private final ObjectProperty<MediaPlayer> mediaPlayerProperty;
@@ -19,46 +19,50 @@ public final class GlobalPlayer {
         currentAudioProperty = new ReadOnlyObjectWrapper<>();
 
         mediaPlayerProperty.addListener((obs, oldPlayer, newPlayer) -> {
-            double volume = 1.0;
+            double volume = 0.10;
             if (oldPlayer != null) {
                 volume = oldPlayer.getVolume();
                 oldPlayer.stop();
             }
 
             newPlayer.setVolume(volume);
+            newPlayer.setOnEndOfMedia(() -> {
+                next();
+                play();
+            });
         });
 
         currentAudioProperty.addListener((obs, oldAudio, newAudio) -> {
             if (newAudio != null) {
-                JMusicPlayerFX.getInstance().setTitle(newAudio.toString());
+                getInstance().setTitle(newAudio.toString());
             } else {
-                JMusicPlayerFX.getInstance().resetTitle();
+                getInstance().resetTitle();
             }
         });
-
-
     }
 
-    public void initNewAudio(int index) {
-        if (currentPlayList != null) {
-            currentIndex = index;
-            AudioFile audioFile = currentPlayList.getAudioFiles().get(index);
-            currentAudioProperty.set(audioFile);
-            mediaPlayerProperty.set(audioFile.getMediaPlayer());
-            play();
+    public void initNewAudio(PlayList playList, AudioFile audioFile) {
+        int index = 0;
+
+        if (currentPlayList != playList) {
+            setCurrentPlayList(playList);
         }
-    }
+        if (playList != null) {
+            index = playList.indexOf(audioFile);
+        }
 
-    public void initNewAudio(AudioFile audioFile) {
-        if (currentPlayList != null) {
-            if (currentPlayList.getAudioFiles().contains(audioFile)) {
-                currentIndex = currentPlayList.getAudioFiles().indexOf(audioFile);
-            } else {
-                currentIndex = 0;
-            }
-        } else currentIndex = 0;
+        setCurrentIndex(index);
 
         currentAudioProperty.set(audioFile);
+        mediaPlayerProperty.set(audioFile.getMediaPlayer());
+    }
+
+    private void initNewAudio(int index) {
+        AudioFile audioFile = currentPlayList.get(index);
+        setCurrentIndex(index);
+
+        currentAudioProperty.set(audioFile);
+        mediaPlayerProperty.set(audioFile.getMediaPlayer());
     }
 
     public void play() {
@@ -69,11 +73,7 @@ public final class GlobalPlayer {
         mediaPlayerProperty.get().pause();
     }
 
-    public void stop() {
-        mediaPlayerProperty.get().stop();
-    }
-
-    public void next() {
+    public void previous() {
         if (currentPlayList != null) {
             if (currentIndex > 0) {
                 currentIndex--;
@@ -82,7 +82,7 @@ public final class GlobalPlayer {
         }
     }
 
-    public void previous() {
+    public void next() {
         if (currentPlayList != null) {
             if (currentIndex < currentPlayList.getAudioFiles().size() - 1) {
                 currentIndex++;
@@ -95,21 +95,12 @@ public final class GlobalPlayer {
         this.currentPlayList = playList;
     }
 
-
     public void setVolume(double volume) {
         mediaPlayerProperty.get().setVolume(volume);
     }
 
-    public ReadOnlyObjectProperty<Duration> currentTimeProperty() {
-        return mediaPlayerProperty.get().currentTimeProperty();
-    }
-
     public void setCurrentIndex(int currentIndex) {
         this.currentIndex = currentIndex;
-    }
-
-    public int getCurrentIndex() {
-        return currentIndex;
     }
 
     public ObjectProperty<AudioFile> currentAudioProperty() {
