@@ -5,18 +5,27 @@ import com.frank.jmusicplayerfx.JMusicPlayerFX;
 import javafx.beans.property.ObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.shape.SVGPath;
+import javafx.util.Duration;
+
+import static com.frank.jmusicplayerfx.Util.formatTime;
+import static com.frank.jmusicplayerfx.Util.initSlider;
 
 public class BottomPlayer {
     private GlobalPlayer globalPlayer;
     private ObjectProperty<MediaPlayer> currentMediaPlayer;
 
+    @FXML private Label lblCurrentTime;
+    @FXML private Label lblTotalTime;
+    @FXML private Slider sliderProgress;
     @FXML private Label graphicPlayButton;
 
     private final SVGPath playSVG;
     private final SVGPath pauseSVG;
+    private Duration temporalDuration;
 
     public BottomPlayer() {
         playSVG = new SVGPath();
@@ -37,19 +46,53 @@ public class BottomPlayer {
 
     @FXML private void initialize() {
         globalPlayer = JMusicPlayerFX.getInstance().getGlobalPlayer();
-
         currentMediaPlayer = globalPlayer.mediaPlayerProperty();
 
-        globalPlayer.mediaPlayerProperty().addListener((o1, oldPlayer, newPlayer) -> {
+        showTimeLabels(false);
+
+        globalPlayer.mediaPlayerProperty().addListener((playerObserver, oldPlayer, newPlayer) -> {
             if (newPlayer != null) {
-                newPlayer.statusProperty().addListener((o2, oldStatus, newStatus) ->
+                showTimeLabels(true);
+                newPlayer.statusProperty().addListener((obs, oldStatus, newStatus) ->
                         graphicPlayButton.setShape(newStatus == Status.PLAYING
-                                ? pauseSVG
-                                : playSVG));
+                    ? pauseSVG
+                    : playSVG));
+                Duration totalDuration = newPlayer.getTotalDuration();
+
+                sliderProgress.setMin(0);
+                sliderProgress.setMax(totalDuration.toSeconds());
+                String totalTime = formatTime(totalDuration);
+                lblTotalTime.setText(totalTime);
+
+                newPlayer.currentTimeProperty().addListener((obs, oldTime, newTime) -> {
+                    if (!sliderProgress.isPressed()) {
+                        String currentTime = formatTime(newTime);
+                        lblCurrentTime.setText(currentTime);
+                        sliderProgress.setValue((int) newTime.toSeconds());
+                    }
+                });
+            } else {
+                showTimeLabels(false);
             }
         });
 
+        sliderProgress.valueProperty().addListener((obs, old, newValue) -> {
+            temporalDuration = new Duration(newValue.intValue() * 1000);
+            if (sliderProgress.isPressed()) {
+                String currentTime = formatTime(temporalDuration);
+                lblCurrentTime.setText(currentTime);
+            }
+        });
+
+        initSlider(sliderProgress, 0, "white", "#d03636");
+
         graphicPlayButton.setShape(playSVG);
+    }
+
+    private void showTimeLabels(boolean show) {
+        lblCurrentTime.setVisible(show);
+        lblTotalTime.setVisible(show);
+        sliderProgress.setDisable(!show);
     }
 
     @FXML private void nextSong() {
