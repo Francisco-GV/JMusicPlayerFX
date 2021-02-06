@@ -1,11 +1,16 @@
 package com.frank.jmusicplayerfx.gui;
 
 import com.frank.jmusicplayerfx.GlobalPlayer;
+import com.frank.jmusicplayerfx.GlobalPlayer.Repeat;
 import com.frank.jmusicplayerfx.JMusicPlayerFX;
+import com.frank.jmusicplayerfx.Util;
 import javafx.beans.property.ObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.shape.SVGPath;
@@ -21,10 +26,16 @@ public class BottomPlayer {
     @FXML private Label lblCurrentTime;
     @FXML private Label lblTotalTime;
     @FXML private Slider sliderProgress;
+    @FXML private Slider sliderVolume;
+    @FXML private Button btnVolume;
+    @FXML private Button btnRepeat;
+    @FXML private Button btnShuffle;
+
     @FXML private Label graphicPlayButton;
 
     private final SVGPath playSVG;
     private final SVGPath pauseSVG;
+
     private Duration temporalDuration;
 
     public BottomPlayer() {
@@ -60,7 +71,7 @@ public class BottomPlayer {
                 Duration totalDuration = newPlayer.getTotalDuration();
 
                 sliderProgress.setMin(0);
-                sliderProgress.setMax(totalDuration.toSeconds());
+                sliderProgress.setMax(totalDuration.toMillis());
                 String totalTime = formatTime(totalDuration);
                 lblTotalTime.setText(totalTime);
 
@@ -68,7 +79,7 @@ public class BottomPlayer {
                     if (!sliderProgress.isPressed()) {
                         String currentTime = formatTime(newTime);
                         lblCurrentTime.setText(currentTime);
-                        sliderProgress.setValue((int) newTime.toSeconds());
+                        sliderProgress.setValue((int) newTime.toMillis());
                     }
                 });
             } else {
@@ -77,16 +88,69 @@ public class BottomPlayer {
         });
 
         sliderProgress.valueProperty().addListener((obs, old, newValue) -> {
-            temporalDuration = new Duration(newValue.intValue() * 1000);
+            temporalDuration = new Duration(newValue.intValue());
             if (sliderProgress.isPressed()) {
                 String currentTime = formatTime(temporalDuration);
                 lblCurrentTime.setText(currentTime);
             }
         });
 
-        initSlider(sliderProgress, 0, "white", "#d03636");
+        sliderProgress.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
+            if (temporalDuration != null) {
+                if (globalPlayer.getMediaPlayer() != null) {
+                    globalPlayer.getMediaPlayer().seek(temporalDuration);
+                }
+            }
+        });
+
+
+        sliderVolume.valueProperty().addListener((observable, oldValue, newValue) -> {
+            double volume = newValue.doubleValue() / 100;
+            globalPlayer.volumeProperty().set(volume);
+        });
+
+        globalPlayer.repeatProperty().addListener((obs, old, repeat) -> {
+            ObservableList<String> styleClass = btnRepeat.getStyleClass();
+            styleClass.removeAll("repeat_song_icon", "repeat_icon" , "selected");
+            switch (repeat) {
+                case DISABLE  -> styleClass.addAll("repeat_icon");
+                case PLAYLIST -> styleClass.addAll("repeat_icon", "selected");
+                case SONG     -> styleClass.addAll("repeat_song_icon", "selected");
+            }
+        });
+
+        globalPlayer.muteProperty().addListener((obs, old, mute) -> {
+            ObservableList<String> styleClass = btnVolume.getStyleClass();
+            if (mute) {
+                styleClass.removeAll("volume_icon");
+                styleClass.add("mute_icon");
+            } else {
+                styleClass.removeAll("mute_icon");
+                styleClass.add("volume_icon");
+            }
+
+            sliderVolume.setDisable(mute);
+        });
+
+        globalPlayer.shuffleProperty().addListener((obs, old, shuffle) -> {
+            ObservableList<String> styleClass = btnShuffle.getStyleClass();
+            if (shuffle) {
+                styleClass.add("selected");
+            } else {
+                styleClass.removeAll("selected");
+            }
+        });
 
         graphicPlayButton.setShape(playSVG);
+
+        initSliders();
+        Util.initProgresiveButton(btnVolume, globalPlayer.volumeProperty());
+    }
+
+    public void initSliders() {
+        initSlider(sliderProgress, 0, "white", "#d03636");
+        initSlider(sliderVolume, 50, "white", "#8a3434");
+
     }
 
     private void showTimeLabels(boolean show) {
@@ -104,17 +168,48 @@ public class BottomPlayer {
 
     @FXML private void previousSong() {
         if (currentMediaPlayer.get() != null) {
-            globalPlayer.previous();
+             Duration time = currentMediaPlayer.get().getCurrentTime();
+
+             if (time.lessThan(Duration.seconds(2))) {
+                 globalPlayer.previous();
+             } else {
+                 globalPlayer.stop();
+             }
+
             globalPlayer.play();
         }
     }
 
+    @FXML private void repeat() {
+        Repeat repeatState = globalPlayer.repeatProperty().get();
+        Repeat newRepeat = switch (repeatState) {
+            case DISABLE  -> Repeat.PLAYLIST;
+            case PLAYLIST -> Repeat.SONG;
+            case SONG     -> Repeat.DISABLE;
+        };
+
+        globalPlayer.repeatProperty().set(newRepeat);
+    }
+
+    @FXML private void shuffle() {
+        boolean shuffleState = globalPlayer.shuffleProperty().get();
+
+        globalPlayer.shuffleProperty().set(!shuffleState);
+    }
+
+    @FXML private void mute() {
+        boolean isMute = globalPlayer.muteProperty().get();
+
+        globalPlayer.muteProperty().set(!isMute);
+    }
+
     @FXML private void play() {
         MediaPlayer player = currentMediaPlayer.get();
+
         if (player != null) {
             switch (player.getStatus()) {
                 case PLAYING -> globalPlayer.pause();
-                case PAUSED -> globalPlayer.play();
+                case PAUSED, STOPPED -> globalPlayer.play();
             }
         }
     }

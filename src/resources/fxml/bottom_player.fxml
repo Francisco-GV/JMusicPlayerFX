@@ -10,42 +10,68 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane id="player" stylesheets="@../css/player_style.css" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frank.jmusicplayerfx.gui.BottomPlayer">
+<GridPane id="player" prefWidth="645.0" stylesheets="@../css/player_style.css" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frank.jmusicplayerfx.gui.BottomPlayer">
     <columnConstraints>
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        <ColumnConstraints halignment="CENTER" hgrow="NEVER" minWidth="125.0" />
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+      <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="160.0" />
+      <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="40.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="NEVER" minWidth="-Infinity" prefWidth="45.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="NEVER" minWidth="-Infinity" prefWidth="45.0" />
+        <ColumnConstraints halignment="CENTER" hgrow="NEVER" minWidth="-Infinity" prefWidth="65.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="NEVER" minWidth="-Infinity" prefWidth="45.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="NEVER" minWidth="-Infinity" prefWidth="45.0" />
+      <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="40.0" />
+      <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="160.0" />
     </columnConstraints>
     <rowConstraints>
-        <RowConstraints valignment="BOTTOM" vgrow="NEVER" />
-      <RowConstraints valignment="TOP" vgrow="NEVER" />
+        <RowConstraints maxHeight="61.0" minHeight="45.0" prefHeight="53.0" valignment="BOTTOM" vgrow="NEVER" />
+      <RowConstraints maxHeight="32.0" minHeight="16.0" prefHeight="24.0" valignment="TOP" vgrow="NEVER" />
     </rowConstraints>
-    <Button id="btn_player_play" mnemonicParsing="false" onAction="#play" styleClass="btn_player" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+    <Button id="btn_player_play" mnemonicParsing="false" onAction="#play" styleClass="btn_player" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
       <graphic>
          <Label fx:id="graphicPlayButton" />
       </graphic>
       <GridPane.margin>
          <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
       </GridPane.margin></Button>
-    <Button id="btn_player_control_left" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#previousSong" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+    <Button id="btn_player_control_left" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#previousSong" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
         <styleClass>
             <String fx:value="btn_player" />
             <String fx:value="btn_player_sides" />
         </styleClass>
     </Button>
-    <Button id="btn_player_control_right" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#nextSong" GridPane.columnIndex="3" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+    <Button id="btn_player_control_right" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#nextSong" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
         <styleClass>
             <String fx:value="btn_player" />
             <String fx:value="btn_player_sides" />
         </styleClass>
     </Button>
-   <HBox alignment="TOP_CENTER" maxHeight="20.0" minHeight="0.0" prefHeight="20.0" spacing="10.0" GridPane.columnSpan="5" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="TOP">
+    <HBox alignment="CENTER" maxWidth="600.0" spacing="10.0" GridPane.columnIndex="1" GridPane.columnSpan="7" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+        <Label fx:id="lblCurrentTime" styleClass="lbl_duration" text="00:00" />
+        <Slider id="slider_progress" fx:id="sliderProgress" minWidth="150.0" prefWidth="150.0" HBox.hgrow="ALWAYS" />
+        <Label fx:id="lblTotalTime" styleClass="lbl_duration" text="00:00" />
+    </HBox>
+   <Button fx:id="btnRepeat" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#repeat" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+      <styleClass>
+         <String fx:value="repeat_icon" />
+         <String fx:value="btn_player_list_control" />
+         <String fx:value="btn_player" />
+      </styleClass></Button>
+   <Button id="shuffle_icon" fx:id="btnShuffle" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#shuffle" GridPane.columnIndex="6" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+      <styleClass>
+         <String fx:value="btn_player_list_control" />
+         <String fx:value="btn_player" />
+      </styleClass></Button>
+   <HBox alignment="CENTER_RIGHT" spacing="15.0" GridPane.columnIndex="8" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowSpan="2" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
       <children>
-         <Label fx:id="lblCurrentTime" styleClass="lbl_duration" text="00:00" />
-         <Slider id="slider_progress" fx:id="sliderProgress" maxWidth="-Infinity" prefHeight="12.0" prefWidth="375.0" HBox.hgrow="SOMETIMES" />
-         <Label fx:id="lblTotalTime" styleClass="lbl_duration" text="00:00" />
+         <Button id="btn_volume" fx:id="btnVolume" mnemonicParsing="false" onAction="#mute" prefHeight="29.0" prefWidth="46.0">
+            <styleClass>
+               <String fx:value="btn_player" />
+               <String fx:value="volume_icon" />
+            </styleClass></Button>
+         <Slider id="slider_volume" fx:id="sliderVolume" blockIncrement="1" value="50.0" HBox.hgrow="ALWAYS" />
       </children>
+      <padding>
+         <Insets right="25.0" />
+      </padding>
    </HBox>
 </GridPane>
