@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.FlowPane;
@@ -49,17 +50,20 @@ public class JMusicPlayerFX extends Application {
     @Override
     public void start(Stage mainStage) {
         this.mainStage = mainStage;
-        mainStage.addEventHandler(WindowEvent.WINDOW_SHOWING, windowEvent ->
+
+        //mainStage.widthProperty().addListener((observable, oldValue, newValue) -> System.out.println(newValue));
+
+        mainStage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent ->
                 BackgroundTasker.executeGUITaskOnce(mainGUILoaderTask, workerStateEvent -> {
-            Scene scene = mainGUILoaderTask.getValue();
-            Pane pane = (Pane) scene.getRoot();
-            mainStage.setMinWidth(pane.getMinWidth());
-            mainStage.setMinHeight(pane.getMinHeight() + 38);
+                    Scene scene = mainGUILoaderTask.getValue();
+                    Pane pane = (Pane) scene.getRoot();
+                    mainStage.setMinWidth(pane.getMinWidth() + 40);
+                    mainStage.setMinHeight(pane.getMinHeight() + 40);
 
-            scene.setFill(Color.rgb(33, 33, 33));
+                    scene.setFill(Color.rgb(33, 33, 33));
 
-            mainStage.setScene(scene);
-        }));
+                    mainStage.setScene(scene);
+                }));
 
         BackgroundFill fill = new BackgroundFill(Color.rgb(20, 20, 20), null, null);
 
@@ -75,12 +79,20 @@ public class JMusicPlayerFX extends Application {
         pane.getChildren().add(label);
         Scene scene = new Scene(pane);
 
+        final Image ICON24x24 = new Image(getClass()
+                .getResourceAsStream("/resources/images/music_24x24.png"), 24, 24, true, true);
+        final Image ICON16x16 = new Image(getClass()
+                .getResourceAsStream("/resources/images/music_16x16.png"), 16, 16, true, true);
+
+        mainStage.getIcons().addAll(ICON24x24, ICON16x16);
+
         mainStage.setTitle(APP_TITLE);
-        mainStage.setWidth(875);
-        mainStage.setHeight(580);
         mainStage.setScene(scene);
-        mainStage.show();
+
+        mainStage.setWidth(975);
+        mainStage.setHeight(650);
         mainStage.centerOnScreen();
+        mainStage.show();
     }
 
     public void setTitle(String text) {
@@ -99,10 +111,6 @@ public class JMusicPlayerFX extends Application {
         return globalPlayer;
     }
 
-    public Stage getMainStage() {
-        return mainStage;
-    }
-
     private static JMusicPlayerFX instance;
 
     public static void main(String[] args) {
@@ -112,7 +120,6 @@ public class JMusicPlayerFX extends Application {
     public static JMusicPlayerFX getInstance() {
         return instance;
     }
-
     /*
         To access te Application object created by JavaFX Runtime, I decided to use a singleton pattern, but
         this class must have a public constructor to create that object. So I will throw a exception to prevent
