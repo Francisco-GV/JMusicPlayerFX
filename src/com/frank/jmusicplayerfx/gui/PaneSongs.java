@@ -5,7 +5,7 @@ import com.frank.jmusicplayerfx.GlobalPlayer;
 import com.frank.jmusicplayerfx.JMusicPlayerFX;
 import com.frank.jmusicplayerfx.media.AudioFile;
 import com.frank.jmusicplayerfx.media.AudioLoader;
-import com.frank.jmusicplayerfx.media.PlayList;
+import com.frank.jmusicplayerfx.media.Playlist;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -22,7 +22,7 @@ import javafx.util.Callback;
 import java.util.List;
 import java.util.TimerTask;
 
-public class SongsPane {
+public class PaneSongs {
     @FXML private TableView<AudioFile> musicTable;
     @FXML private TableColumn<AudioFile, String> titleColumn;
     @FXML private TableColumn<AudioFile, String> artistColumn;
@@ -31,20 +31,20 @@ public class SongsPane {
 
     private AudioLoader audioLoader;
     private GlobalPlayer globalPlayer;
-    private PlayList playList;
+    private Playlist playList;
 
     @SuppressWarnings("FieldCanBeLocal")
     private TimerTask tableSorter;
 
     @FXML private void initialize() {
-        playList = new PlayList("songs");
+        playList = new Playlist("songs");
 
         tableSorter = new TimerTask(){
             @Override
             public void run() {
                 updateSongs();
                 Platform.runLater(() -> {
-                    PlayList playerPlaylist = globalPlayer.getCurrentPlayList();
+                    Playlist playerPlaylist = globalPlayer.getCurrentPlaylist();
 
                     if (playerPlaylist != null) {
                         AudioFile audioFile = null;
@@ -124,8 +124,8 @@ public class SongsPane {
         musicTable.widthProperty().addListener(new ChangeListener<>() {
             @Override
             public void changed(ObservableValue<? extends Number> obs, Number old, Number newWidth) {
-                albumColumn.setVisible(!(newWidth.doubleValue() < 600));
-                durationColumn.setVisible(!(newWidth.doubleValue() < 450));
+                albumColumn.setVisible(!(newWidth.doubleValue() <= 600));
+                durationColumn.setVisible(!(newWidth.doubleValue() <= 450));
                 List<TableColumn<AudioFile, ?>> columns = musicTable.getColumns();
 
                 int num = (int) columns.stream().filter(TableColumn::isVisible).count();
