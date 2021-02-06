@@ -5,30 +5,32 @@ import com.frank.jmusicplayerfx.JMusicPlayerFX;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainGUI {
     @FXML private Pane leftMenu;
     @FXML private Pane leftMenuSections;
     @FXML private Label graphicBtnHideMenu;
     @FXML private Label lblTitleContent;
-    @FXML private ScrollPane scrollpaneContent;
+    @FXML private ScrollPane scrollPaneContainer;
 
     private boolean leftMenuMinimize;
     private Timeline sizeTimeline;
@@ -36,8 +38,9 @@ public class MainGUI {
     private final SVGPath buttonLeftSVG;
     private final SVGPath buttonRightSVG;
 
-    private Parent musicPane;
-    private final Task<Pane> musicPaneLoaderTask;
+    private List<Pane> panes;
+
+    private final Map<String, Label> buttonLabelsMap = new HashMap<>();
 
     public MainGUI() {
         buttonLeftSVG = new SVGPath();
@@ -53,13 +56,6 @@ public class MainGUI {
 
         buttonLeftSVG.setContent(leftPath);
         buttonRightSVG.setContent(rightPath);
-
-        musicPaneLoaderTask = new Task<>() {
-            @Override
-            protected Pane call() throws IOException {
-                return FXMLLoader.load(getClass().getResource("/resources/fxml/songs_pane.fxml"));
-            }
-        };
     }
 
     @FXML private void initialize() {
@@ -69,13 +65,30 @@ public class MainGUI {
         leftMenuMinimize = false;
         leftMenu.setPrefWidth(leftMenu.getMaxWidth());
 
-        setContentView("Loading...", null);
+        BackgroundTasker.executeInOtherThread(() -> Platform.runLater(() -> {
+            panes = new ArrayList<>();
+            try {
+                panes.add(SONGS, (Pane) loadFXML("/resources/fxml/pane_songs.fxml"));
+                panes.add(ARTISTS, (Pane) loadFXML("/resources/fxml/pane_artists.fxml"));
+                panes.add(ALBUMS, null);
+                panes.add(PLAYLISTS, null);
+                panes.add(FAVORITES, null);
 
-        BackgroundTasker.executeGUITaskOnce(musicPaneLoaderTask, e -> {
-            musicPane = musicPaneLoaderTask.getValue();
-            setContentView(TITLE_SONGS, musicPane);
-            selectFirstButton();
-        });
+                setContent(SONGS);
+                selectFirstButton();
+
+                getSectionButtons().forEach(node -> {
+                    HBox pane = (HBox) node;
+                    pane.getChildren().forEach(children -> {
+                        if (children.getStyleClass().contains("lbl_title")) {
+                            buttonLabelsMap.put(node.getId(), (Label) children);
+                        }
+                    });
+                });
+            } catch(IOException ex) {
+                ex.getStackTrace();
+            }
+        }));
     }
 
     @FXML private void minimizeLeftMenu() {
@@ -92,13 +105,13 @@ public class MainGUI {
             value = new KeyValue(writableValue, leftMenu.getMaxWidth());
             frame = new KeyFrame(duration, value);
 
-            configureButtonsContentDisplay(ContentDisplay.LEFT);
+            hideText(false);
             shape = buttonLeftSVG;
 
             leftMenuMinimize = false;
         } else {
             value = new KeyValue(writableValue, leftMenu.getMinWidth());
-            frame = new KeyFrame(duration, e -> configureButtonsContentDisplay(ContentDisplay.GRAPHIC_ONLY) , value);
+            frame = new KeyFrame(duration, e -> hideText(true) , value);
             shape = buttonRightSVG;
             leftMenuMinimize = true;
         }
@@ -107,57 +120,74 @@ public class MainGUI {
         sizeTimeline.play();
     }
 
-    private void configureButtonsContentDisplay(ContentDisplay contentDisplay) {
+    private void hideText(boolean hide) {
         for (Node node : leftMenuSections.getChildren()) {
-            if (node instanceof Button) {
-                ((Button) node).setContentDisplay(contentDisplay);
+            HBox pane;
+            if (node instanceof HBox) {
+                pane = (HBox) node;
+
+                Label label = buttonLabelsMap.get(pane.getId());
+                if (hide) {
+                    pane.getChildren().removeAll(label);
+                } else {
+                    if (!pane.getChildren().contains(label)) {
+                        pane.getChildren().add(label);
+                    }
+                }
             }
         }
     }
 
-    private List<Node> getButtons() {
+    private List<Node> getSectionButtons() {
         return leftMenuSections.getChildren();
     }
 
-    @FXML private void openSection(ActionEvent evt) {
-        if (evt.getSource() instanceof Button) {
-            Button btn = (Button) evt.getSource();
+    @FXML private void openSection(Event evt) {
+        Node source = (Node) evt.getSource();
 
-            getButtons().forEach(node -> node.getStyleClass().removeAll("button_selected"));
-            btn.getStyleClass().add("button_selected");
+        String selected = "selected";
+        getSectionButtons().forEach(node -> node.getStyleClass().removeAll(selected));
+        source.getStyleClass().add(selected);
 
-            switch (btn.getId()) {
-                case "btn_songs"        -> setContentView(TITLE_SONGS, musicPane);
-                case "btn_artists"      -> setContentView(TITLE_ARTISTS, null);
-                case "btn_albums"       -> setContentView(TITLE_ALBUMS, null);
-                case "btn_playlists"    -> setContentView(TITLE_PLAYLISTS, null);
-                case "btn_favorites"    -> setContentView(TITLE_FAVORITES, null);
-                default                 -> setContentView(TITLE_UNKNOWN, null);
-            }
+        switch (source.getId()) {
+            case "btn_songs"     -> setContent(SONGS);
+            case "btn_artists"   -> setContent(ARTISTS);
+            case "btn_albums"    -> setContent(ALBUMS);
+            case "btn_playlists" -> setContent(PLAYLISTS);
+            case "btn_favorites" -> setContent(FAVORITES);
+            default              -> setContent(UNKNOWN);
         }
     }
 
     private void selectFirstButton() {
-        getButtons().stream()
+        getSectionButtons().stream()
             .filter(btn -> btn.getId().equals("btn_songs"))
-            .findFirst().ifPresent(btn -> btn.getStyleClass().add("button_selected"));
+            .findFirst().ifPresent(btn -> btn.getStyleClass().add("selected"));
     }
 
-    private void setContentView(String title, Parent content) {
-        lblTitleContent.setText(title);
-        scrollpaneContent.setContent(content);
-        scrollpaneContent.setFitToWidth(true);
-        scrollpaneContent.setFitToHeight(true);
+    private void setContent(int index) {
+        lblTitleContent.setText(TITLES[index]);
+        Pane content = panes.get(index);
+
+        scrollPaneContainer.setContent(content);
     }
 
     @FXML private void openAuthorLink() {
         JMusicPlayerFX.getInstance().getHostServices().showDocument("https://twitter.com/FrankGV42");
     }
 
-    private final static String TITLE_SONGS     = "Songs";
-    private final static String TITLE_ARTISTS   = "Artists";
-    private final static String TITLE_ALBUMS    = "Albums";
-    private final static String TITLE_PLAYLISTS = "Playlists";
-    private final static String TITLE_FAVORITES = "Favorites";
-    private final static String TITLE_UNKNOWN   = "UNKNOWN";
+    private Parent loadFXML(String path) throws IOException {
+        return FXMLLoader.load(getClass().getResource(path));
+    }
+
+    private final static String[] TITLES = new String[] {
+            "Songs", "Artists", "Albums", "Playlists", "Favorites", "Unknown"
+    };
+
+    private final static int SONGS = 0;
+    private final static int ARTISTS = 1;
+    private final static int ALBUMS = 2;
+    private final static int PLAYLISTS = 3;
+    private final static int FAVORITES = 4;
+    private final static int UNKNOWN = 5;
 }
