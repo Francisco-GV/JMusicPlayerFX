@@ -1,46 +1,73 @@
 package com.frank.jmusicplayerfx.media;
 
 import static com.frank.jmusicplayerfx.Util.formatTime;
+import static com.frank.jmusicplayerfx.media.AudioLoader.Info.*;
 
+import com.frank.jmusicplayerfx.JMusicPlayerFX;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableMap;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.util.Duration;
 import java.io.File;
+import java.util.Map;
 
 @SuppressWarnings("unused")
 public class AudioFile {
     private final StringProperty title;
     private final StringProperty artist;
     private final StringProperty album;
-    private final ObjectProperty<Duration> duration;
     private final StringProperty durationFormated;
     private final MediaPlayer mediaPlayer;
 
     public AudioFile(File file) {
-        title = new SimpleStringProperty("Unknown");
-        artist = new SimpleStringProperty("Unknown");
-        album = new SimpleStringProperty("Unknown");
+        title = new SimpleStringProperty(DEFAULT_TITLE);
+        artist = new SimpleStringProperty(DEFAULT_ARTIST);
+        album = new SimpleStringProperty(DEFAULT_ALBUM);
         durationFormated = new SimpleStringProperty("00:00");
-        duration = new SimpleObjectProperty<>(Duration.seconds(0));
 
         Media media = new Media(file.toURI().toString());
         this.mediaPlayer = new MediaPlayer(media);
 
-        mediaPlayer.statusProperty().addListener((obs, old, newValue) -> {
-            if (newValue == MediaPlayer.Status.READY) {
-                ObservableMap<String, Object> metadata = mediaPlayer.getMedia().getMetadata();
+        mediaPlayer.statusProperty().addListener(new ChangeListener<>() {
+            @Override
+            public void changed(ObservableValue<? extends MediaPlayer.Status> observable, MediaPlayer.Status oldValue, MediaPlayer.Status newValue) {
+                if (newValue == MediaPlayer.Status.READY) {
+                    ObservableMap<String, Object> metadata = mediaPlayer.getMedia().getMetadata();
 
-                title.bind(Bindings.valueAt(metadata, "title").asString());
-                artist.bind(Bindings.valueAt(metadata, "artist").asString());
-                album.bind(Bindings.valueAt(metadata, "album").asString());
-                duration.bind(Bindings.createObjectBinding(media::getDuration));
-                durationFormated.bind(Bindings.createStringBinding(() -> formatTime(media.getDuration())));
+                    title.bind(getOrDefault(metadata, "title", DEFAULT_TITLE));
+                    artist.bind(getOrDefault(metadata, "artist", DEFAULT_ARTIST));
+                    album.bind(getOrDefault(metadata, "album", DEFAULT_ALBUM));
+                    durationFormated.bind(Bindings.createStringBinding(() -> formatTime(media.getDuration())));
+
+                    AudioLoader.Info info = JMusicPlayerFX.getInstance().getAudioLoader().getInfo();
+
+                    Artist artist = new Artist(artistProperty().get());
+                    Album album = new Album(albumProperty().get(), artist);
+
+
+                    if (!albumProperty().get().equals(DEFAULT_ALBUM)) {
+                        album.getSongs().add(AudioFile.this);
+                        artist.getAlbums().add(album);
+                        info.addAlbum(album);
+                    } else {
+                        artist.getSingles().add(AudioFile.this);
+                    }
+
+                    info.addArtist(artist);
+                }
+            }
+
+            private StringBinding getOrDefault(Map<String, Object> map, String key, String defaultText) {
+                return Bindings.createStringBinding(() -> {
+                    if (!map.containsKey(key)) return defaultText;
+                    String value = (String) map.get(key);
+                    return value != null ? value : defaultText;
+                });
             }
         });
     }
@@ -53,10 +80,6 @@ public class AudioFile {
     public MediaPlayer getMediaPlayer() {
         return mediaPlayer;
     }
-
-    public static String[] EXTENSIONS = new String[]{
-            "mp3", "wav"
-    };
 
     public String getTitle() {
         return title.get();
@@ -82,14 +105,6 @@ public class AudioFile {
         return album;
     }
 
-    public Duration getDuration() {
-        return duration.get();
-    }
-
-    public ObjectProperty<Duration> durationProperty() {
-        return duration;
-    }
-
     public String getDurationFormated() {
         return durationFormated.get();
     }
@@ -97,4 +112,12 @@ public class AudioFile {
     public StringProperty durationFormatedProperty() {
         return durationFormated;
     }
+
+    public static String[] EXTENSIONS = new String[]{
+            "mp3", "wav"
+    };
+
+    public static final String DEFAULT_TITLE = "Unknown";
+    public static final String DEFAULT_ARTIST = "Unknown artist";
+    public static final String DEFAULT_ALBUM = "Unknown";
 }
