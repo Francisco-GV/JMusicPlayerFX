@@ -1,26 +1,18 @@
 package com.frank.jmusicplayerfx.gui;
 
-import com.frank.jmusicplayerfx.BackgroundTasker;
-import com.frank.jmusicplayerfx.GlobalPlayer;
+import com.frank.jmusicplayerfx.AudioLoader;
 import com.frank.jmusicplayerfx.JMusicPlayerFX;
 import com.frank.jmusicplayerfx.media.AudioFile;
-import com.frank.jmusicplayerfx.media.AudioLoader;
 import com.frank.jmusicplayerfx.media.Playlist;
-import javafx.application.Platform;
+import com.frank.jmusicplayerfx.util.Util;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.util.Callback;
 
 import java.util.List;
-import java.util.TimerTask;
 
 public class PaneSongs {
     @FXML private TableView<AudioFile> musicTable;
@@ -29,98 +21,21 @@ public class PaneSongs {
     @FXML private TableColumn<AudioFile, String> albumColumn;
     @FXML private TableColumn<AudioFile, String> durationColumn;
 
-    private AudioLoader audioLoader;
-    private GlobalPlayer globalPlayer;
-    private Playlist playList;
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private TimerTask tableSorter;
-
     @FXML private void initialize() {
-        playList = new Playlist("songs");
+        AudioLoader audioLoader = JMusicPlayerFX.getInstance().getAudioLoader();
 
-        tableSorter = new TimerTask(){
-            @Override
-            public void run() {
-                updateSongs();
-                Platform.runLater(() -> {
-                    Playlist playerPlaylist = globalPlayer.getCurrentPlaylist();
+        titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
+        artistColumn.setCellValueFactory(cellData -> cellData.getValue().artistProperty());
+        albumColumn.setCellValueFactory(cellData -> cellData.getValue().albumProperty());
+        durationColumn.setCellValueFactory(cellData -> cellData.getValue().durationFormattedProperty());
 
-                    if (playerPlaylist != null) {
-                        AudioFile audioFile = null;
-                        if (!playerPlaylist.getAudioFiles().equals(playList.getAudioFiles())) {
-                            audioFile = globalPlayer.currentAudioProperty().get();
-                        }
+        ObservableList<AudioFile> allAudioFiles = audioLoader.getAllMediaList();
 
-                        musicTable.sort();
+        titleColumn.setSortType(TableColumn.SortType.ASCENDING);
+        musicTable.getSortOrder().add(titleColumn);
 
-                        if (audioFile != null) {
-                            int index = playList.getAudioFiles().indexOf(audioFile);
-                            globalPlayer.setCurrentIndex(index);
-                        }
-                    } else {
-                        musicTable.sort();
-                    }
-                });
-            }
-        };
-        musicTable.getColumns().forEach(column -> {
-            column.setResizable(false);
-            column.setReorderable(false);
-        });
-        audioLoader = JMusicPlayerFX.getInstance().getAudioLoader();
-        globalPlayer = JMusicPlayerFX.getInstance().getGlobalPlayer();
+        Util.initMusicTable(new Playlist("All songs", allAudioFiles), musicTable);
 
-        titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        artistColumn.setCellValueFactory(new PropertyValueFactory<>("artist"));
-        albumColumn.setCellValueFactory(new PropertyValueFactory<>("album"));
-        durationColumn.setCellValueFactory(new PropertyValueFactory<>("durationFormated"));
-
-        musicTable.setRowFactory(new Callback<>() {
-            @Override
-            public TableRow<AudioFile> call(TableView<AudioFile> param) {
-                TableRow<AudioFile> row = new TableRow<>();
-
-                row.itemProperty()
-                        .addListener((obs, old, newItem) -> styleRow(row));
-
-                globalPlayer.currentAudioProperty()
-                        .addListener((obs, old, newAudio) -> styleRow(row));
-
-                row.setOnMouseClicked(event -> {
-                    if (event.getClickCount() == 2 && !row.isEmpty()) {
-                        selectFile(row.getItem());
-                    }
-                });
-                row.selectedProperty().addListener((obs, old, isSelected) -> {
-                    if (isSelected) {
-                        Platform.runLater(row::requestFocus);
-                    }
-                });
-                row.addEventHandler(KeyEvent.KEY_RELEASED, event -> {
-                    if (event.getCode() == KeyCode.ENTER) {
-                        selectFile(row.getItem());
-                    }
-                });
-                return row;
-            }
-
-            private void styleRow(TableRow<AudioFile> tableRow) {
-                styleRow(tableRow, tableRow.getItem());
-            }
-
-            private void styleRow(TableRow<AudioFile> row, AudioFile rowFile) {
-                AudioFile currentAudio = globalPlayer.currentAudioProperty().get();
-
-                if (currentAudio == rowFile) {
-                    row.getStyleClass().add("playing");
-                } else {
-                    row.getStyleClass().removeAll("playing");
-                }
-            }
-        });
-
-        playList.setAudioFiles(musicTable.getItems());
         musicTable.widthProperty().addListener(new ChangeListener<>() {
             @Override
             public void changed(ObservableValue<? extends Number> obs, Number old, Number newWidth) {
@@ -150,26 +65,5 @@ public class PaneSongs {
                 return width / 100.0 * percent;
             }
         });
-
-        titleColumn.setSortType(TableColumn.SortType.ASCENDING);
-        musicTable.getSortOrder().add(titleColumn);
-
-        BackgroundTasker.executePeriodically(tableSorter, 0, 2500);
-    }
-
-    private void updateSongs() {
-        audioLoader.getAllMedia().forEach(this::addToTable);
-    }
-
-    private void addToTable(AudioFile audioFile) {
-        ObservableList<AudioFile> list = musicTable.getItems();
-        if (!list.contains(audioFile)) {
-            list.add(audioFile);
-        }
-    }
-
-    private void selectFile(AudioFile audio) {
-        globalPlayer.initNewAudio(playList, audio);
-        globalPlayer.play();
     }
 }
