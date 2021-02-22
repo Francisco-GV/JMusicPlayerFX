@@ -1,0 +1,52 @@
+#top_content_container {
+    /*-fx-background-color : rgba(0, 0, 0, 0.3);*/
+}
+
+#content_container {
+    -fx-background-color : #222222;
+}
+
+#return_button {
+    -fx-content-display  : graphic-only;
+    -fx-background-color : white;
+    -fx-shape            : "M10.88,17.715a1,1,0,0,0,0-1.415L7.588,13.007,18,13a1,1,0,0,0,0-2l-10.414.007L10.88,7.715A1,1,0,0,0,9.466,6.3L5.88,9.886a3,3,0,0,0,0,4.243l3.586,3.586A1,1,0,0,0,10.88,17.715Z";
+}
+
+#return_button:hover {
+    -fx-background-color : #a9a9a9;
+}
+
+#return_button:pressed {
+    -fx-background-color : #868686;
+}
+
+#lbl_artist_name {
+    -fx-text-fill : white;
+    -fx-font-size : 25px;
+}
+
+.scroll-pane, .scroll-pane .viewport {
+    -fx-background-color : transparent;
+}
+
+#lbl_pic {
+    -fx-content-display : graphic-only;
+    -fx-pref-width      : 36px;
+    -fx-pref-height     : 45px;
+}
+
+.default_picture {
+    -fx-pref-width  : 36px;
+    -fx-pref-height : 45px;
+    -fx-shape       : "M 12 0 C 8.6862915 0 6 2.6862915 6 6 C 6 9.3137085 8.6862915 12 12 12 C 15.313708 12 18 9.3137085 18 6 C 18 2.6862915 15.313708 0 12 0 z M 12 14 C 7.0317218 14.0055 3.0055111 18.031722 3 23 C 3 23.552285 3.4477153 24 4 24 L 20 24 C 20.552285 24 21 23.552285 21 23 C 20.9945 18.031722 16.968278 14.005511 12 14 z";
+}
+
+.picture {
+    -fx-pref-width  : 100px;
+    -fx-pref-height : 100px;
+}
+
+.lbl_content_title {
+    -fx-font-size : 20px;
+    -fx-text-fill : white;
+}

@@ -1,0 +1,75 @@
+* {
+    -fx-width  : 125px;
+    -fx-height : -fx-width;
+}
+
+#album_element {
+    -fx-cursor            : hand;
+    -fx-border-radius     : 15px;
+    -fx-background-radius : 15px;
+    -fx-padding           : 10;
+    -fx-spacing           : 2;
+    -fx-fill-width        : true;
+    -fx-alignment         : top_center;
+}
+
+#album_element:hover {
+    -fx-background-color : rgba(50, 50, 50, 0.5);
+}
+
+#album_element:pressed {
+    -fx-background-color : rgba(75, 75, 75, 0.5);
+}
+
+#lbl_name {
+    -fx-text-alignment  : left;
+    -fx-alignment       : top-left;
+    -fx-text-fill       : white;
+    -fx-font-size       : 14px;
+    -fx-pref-width      : 130px;
+    -fx-wrap-text       : true;
+    -fx-font-weight     : bold;
+    -fx-content-display : text-only;
+}
+
+#lbl_year {
+    -fx-text-alignment  : left;
+    -fx-alignment       : top-left;
+    -fx-text-fill       : #cacaca;
+    -fx-font-size       : 12;
+    -fx-pref-width      : 130px;
+    -fx-font-style      : italic;
+    -fx-content-display : text-only;
+}
+
+#lbl_artist {
+    -fx-text-alignment  : left;
+    -fx-alignment       : top-left;
+    -fx-text-fill       : #b3b3b3;
+    -fx-font-size       : 13px;
+    -fx-pref-width      : 130px;
+    -fx-wrap-text       : true;
+    -fx-content-display : text-only;
+}
+
+#picture_container {
+    -fx-pref-width  : -fx-width;
+    -fx-pref-height : -fx-height;
+    -fx-min-width   : -fx-width;
+    -fx-min-height  : -fx-height;
+    -fx-max-width   : -fx-width;
+    -fx-max-height  : -fx-height;
+}
+
+.picture {
+    -fx-content-display : graphic-only;
+    -fx-pref-width      : -fx-width;
+    -fx-pref-height     : -fx-height;
+    -fx-shape           : null;
+}
+
+.default_picture {
+    -fx-pref-width  : 75px;
+    -fx-pref-height : 75px;
+    -fx-shape       : "M22.554.923A3.978,3.978,0,0,0,19.263.07L10.079,1.792A5,5,0,0,0,6,6.706v9.85A3.959,3.959,0,0,0,4,16a4,4,0,1,0,4,4V10.876A2,2,0,0,1,9.632,8.91l11.183-2.1A1,1,0,0,1,22,7.8v5.76A3.959,3.959,0,0,0,20,13a4,4,0,1,0,4,4V4A3.987,3.987,0,0,0,22.554.923Z";
+}

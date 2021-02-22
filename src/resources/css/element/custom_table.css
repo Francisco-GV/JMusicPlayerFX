@@ -1,0 +1,92 @@
+.custom_table {
+    -fx-background-color : rgba(0, 0, 0, 0.6);
+}
+
+/*Top right corner above scroll-bar*/
+.custom_table .column-header-background .filler {
+    -fx-background-color : transparent;
+}
+
+/*Bottom right corner between scrollbars*/
+.custom_table .corner {
+    -fx-background-color : transparent;
+}
+
+/*Individual column header*/
+.custom_table .column-header {
+    -fx-background-color : transparent;
+}
+
+/*Global background header bar*/
+.custom_table .column-header-background {
+    -fx-background-color : transparent;
+    -fx-padding          : 13 0;
+}
+
+.custom_table .table-cell {
+    -fx-border-color : transparent;
+    -fx-pref-height: 40;
+}
+
+.custom_table .table-row-cell {
+    -fx-text-background-color : white;
+}
+
+.custom_table .playing {
+    -fx-text-background-color : #e76363;
+    -fx-font-size: 110%;
+}
+
+
+.custom_table .table-row-cell:odd {
+    -fx-background-color : transparent;
+}
+
+.custom_table .table-row-cell:even {
+    -fx-background-color : rgba(100, 100, 100, 0.3);
+}
+
+.custom_table .table-row-cell:hover {
+    -fx-background-color : rgb(74, 74, 74);
+}
+
+.custom_table .table-row-cell:selected {
+    -fx-background-color : rgb(114, 41, 41);
+    -fx-text-background-color : white;
+}
+
+.custom_table .table-row-cell:selected:hover,
+.custom_table .table-row-cell:pressed {
+    -fx-background-color : rgb(76, 25, 25);
+}
+
+.custom_table .table-row-cell:pressed {
+    -fx-background-color : rgb(121, 121, 121);
+}
+
+
+.custom_table .virtual-flow .scroll-bar .increment-button,
+.custom_table .virtual-flow .scroll-bar .decrement-button {
+    -fx-opacity : 0;
+}
+
+.custom_table .virtual-flow .scroll-bar:horizontal,
+.custom_table .virtual-flow .scroll-bar:horizontal .track,
+.custom_table .virtual-flow .scroll-bar:horizontal .thumb {
+    -fx-background-color  : transparent;
+    -fx-background-radius : 0;
+    -fx-border-radius     : 0;
+    -fx-padding           : 0;
+    -fx-background-insets : 0;
+    -fx-pref-height       : 0;
+
+}
+
+.custom_table .virtual-flow .scroll-bar:vertical,
+.custom_table .virtual-flow .scroll-bar:vertical .track {
+    -fx-background-color : transparent;
+}
+
+.custom_table .virtual-flow .scroll-bar:vertical .thumb {
+    -fx-background-color : #585858;
+}
