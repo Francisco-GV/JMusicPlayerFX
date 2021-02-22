@@ -3,8 +3,10 @@ package com.frank.jmusicplayerfx.gui;
 import com.frank.jmusicplayerfx.GlobalPlayer;
 import com.frank.jmusicplayerfx.GlobalPlayer.Repeat;
 import com.frank.jmusicplayerfx.JMusicPlayerFX;
-import com.frank.jmusicplayerfx.Util;
+import com.frank.jmusicplayerfx.util.Util;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -16,8 +18,8 @@ import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 
-import static com.frank.jmusicplayerfx.Util.formatTime;
-import static com.frank.jmusicplayerfx.Util.initSlider;
+import static com.frank.jmusicplayerfx.util.Util.formatTime;
+import static com.frank.jmusicplayerfx.util.Util.initSlider;
 
 public class BottomPlayer {
     private GlobalPlayer globalPlayer;
@@ -61,13 +63,21 @@ public class BottomPlayer {
 
         showTimeLabels(false);
 
-        globalPlayer.mediaPlayerProperty().addListener((playerObserver, oldPlayer, newPlayer) -> {
-            if (newPlayer != null) {
-                showTimeLabels(true);
-                newPlayer.statusProperty().addListener((obs, oldStatus, newStatus) ->
-                        graphicPlayButton.setShape(newStatus == Status.PLAYING
-                    ? pauseSVG
-                    : playSVG));
+        globalPlayer.mediaPlayerProperty().addListener(new ChangeListener<>() {
+            @Override
+            public void changed(ObservableValue<? extends MediaPlayer> observable, MediaPlayer oldValue, MediaPlayer newPlayer) {
+                if (newPlayer != null) {
+                    bindProperties(newPlayer);
+                    showTimeLabels(true);
+                } else {
+                    showTimeLabels(false);
+                }
+            }
+
+            private void bindProperties(MediaPlayer newPlayer) {
+                newPlayer.statusProperty().addListener((obs, oldStatus, newStatus) -> {
+                    graphicPlayButton.setShape(newStatus == Status.PLAYING ? pauseSVG : playSVG);
+                });
                 Duration totalDuration = newPlayer.getTotalDuration();
 
                 sliderProgress.setMin(0);
@@ -82,8 +92,7 @@ public class BottomPlayer {
                         sliderProgress.setValue((int) newTime.toMillis());
                     }
                 });
-            } else {
-                showTimeLabels(false);
+
             }
         });
 
