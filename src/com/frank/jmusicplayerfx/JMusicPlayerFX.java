@@ -1,25 +1,20 @@
 package com.frank.jmusicplayerfx;
 
-import com.frank.jmusicplayerfx.media.AudioLoader;
+import com.frank.jmusicplayerfx.gui.MainGUI;
+import com.frank.jmusicplayerfx.util.BackgroundTasker;
+import com.frank.jmusicplayerfx.util.Loader;
+import com.frank.jmusicplayerfx.util.Loader.FXMLObject;
+import com.frank.jmusicplayerfx.util.Transition;
+import com.frank.jmusicplayerfx.util.Util;
 import javafx.application.Application;
 import javafx.concurrent.Task;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Parent;
+import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
-import java.io.File;
 import java.io.IOException;
 
 public class JMusicPlayerFX extends Application {
@@ -28,71 +23,61 @@ public class JMusicPlayerFX extends Application {
     private Stage mainStage;
     private AudioLoader audioLoader;
     private GlobalPlayer globalPlayer;
-    private Task<Scene> mainGUILoaderTask;
+    private MainGUI mainGUI;
 
     @Override
     public void init() {
         audioLoader = new AudioLoader();
         globalPlayer = new GlobalPlayer();
-
-        File musicDirFile = new File(System.getProperty("user.home").concat("\\Music"));
-        audioLoader.addNewDirectory(musicDirFile);
-
-        mainGUILoaderTask = new Task<>() {
-            @Override
-            protected Scene call() throws IOException {
-                Parent parent = FXMLLoader.load(getClass().getResource("/resources/fxml/main_gui.fxml"));
-                return new Scene(parent);
-            }
-        };
     }
 
     @Override
     public void start(Stage mainStage) {
         this.mainStage = mainStage;
 
-        //mainStage.widthProperty().addListener((observable, oldValue, newValue) -> System.out.println(newValue));
-
-        mainStage.addEventHandler(WindowEvent.WINDOW_SHOWN, windowEvent ->
-                BackgroundTasker.executeGUITaskOnce(mainGUILoaderTask, workerStateEvent -> {
-                    Scene scene = mainGUILoaderTask.getValue();
-                    Pane pane = (Pane) scene.getRoot();
-                    mainStage.setMinWidth(pane.getMinWidth() + 40);
-                    mainStage.setMinHeight(pane.getMinHeight() + 40);
-
-                    scene.setFill(Color.rgb(33, 33, 33));
-
-                    mainStage.setScene(scene);
-                }));
-
-        BackgroundFill fill = new BackgroundFill(Color.rgb(20, 20, 20), null, null);
-
-        FlowPane pane = new FlowPane();
-        pane.setAlignment(Pos.TOP_CENTER);
-        pane.setBackground(new Background(fill));
-        pane.setPadding(new Insets(10, 10, 10, 10));
-
-        Label label = new Label("Loading...");
-        label.setContentDisplay(ContentDisplay.TOP);
-        label.setTextFill(Color.WHITE);
-
-        pane.getChildren().add(label);
-        Scene scene = new Scene(pane);
-
-        final Image ICON24x24 = new Image(getClass()
-                .getResourceAsStream("/resources/images/music_24x24.png"), 24, 24, true, true);
-        final Image ICON16x16 = new Image(getClass()
-                .getResourceAsStream("/resources/images/music_16x16.png"), 16, 16, true, true);
-
+        final Image ICON24x24 = Util.getImage("/resources/images/music_24x24.png", 24, 24);
+        final Image ICON16x16 = Util.getImage("/resources/images/music_16x16.png", 16, 16);
         mainStage.getIcons().addAll(ICON24x24, ICON16x16);
 
-        mainStage.setTitle(APP_TITLE);
+        Scene scene = new Scene(new Group());
+        scene.setFill(Color.rgb(33, 33, 33));
         mainStage.setScene(scene);
 
+        mainStage.setTitle(APP_TITLE);
         mainStage.setWidth(975);
         mainStage.setHeight(650);
         mainStage.centerOnScreen();
         mainStage.show();
+
+        prepareMainGUILoading();
+    }
+
+    public void prepareMainGUILoading() {
+        Task<Pane> mainGUIScene = new Task<>() {
+            @Override
+            protected Pane call() throws IOException {
+                FXMLObject<Pane, MainGUI> object = Loader.loadFXMLObject("/resources/fxml/main_gui.fxml");
+                mainGUI = object.getController();
+                return object.getRoot();
+            }
+        };
+
+        BackgroundTasker.executeGUITaskOnce(mainGUIScene, event -> {
+            Pane pane = mainGUIScene.getValue();
+            Transition.fade(3000, 750, pane);
+
+            mainStage.setMinWidth(pane.getMinWidth() + 40);
+            mainStage.setMinHeight(pane.getMinHeight() + 40);
+
+            Scene scene = new Scene(pane);
+            scene.setFill(Color.rgb(33, 33, 33));
+
+            mainStage.setScene(scene);
+
+            audioLoader.addNewDirectory(System.getProperty("user.home").concat("\\Music"));
+
+            audioLoader.loadAllMedia();
+        });
     }
 
     public void setTitle(String text) {
@@ -111,15 +96,20 @@ public class JMusicPlayerFX extends Application {
         return globalPlayer;
     }
 
-    private static JMusicPlayerFX instance;
+    public MainGUI getMainGUI() {
+        return mainGUI;
+    }
 
     public static void main(String[] args) {
         Application.launch(args);
     }
 
+    private static JMusicPlayerFX instance;
+
     public static JMusicPlayerFX getInstance() {
         return instance;
     }
+
     /*
         To access te Application object created by JavaFX Runtime, I decided to use a singleton pattern, but
         this class must have a public constructor to create that object. So I will throw a exception to prevent
