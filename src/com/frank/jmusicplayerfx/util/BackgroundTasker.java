@@ -1,4 +1,4 @@
-package com.frank.jmusicplayerfx;
+package com.frank.jmusicplayerfx.util;
 
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
