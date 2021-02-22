@@ -47,7 +47,7 @@
     </Button>
     <HBox alignment="CENTER" maxWidth="600.0" spacing="10.0" GridPane.columnIndex="1" GridPane.columnSpan="7" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
         <Label fx:id="lblCurrentTime" styleClass="lbl_duration" text="00:00" />
-        <Slider id="slider_progress" fx:id="sliderProgress" minWidth="150.0" prefWidth="150.0" HBox.hgrow="ALWAYS" />
+        <Slider id="slider_progress" fx:id="sliderProgress" value="50.0" minWidth="150.0" prefWidth="150.0" HBox.hgrow="ALWAYS" />
         <Label fx:id="lblTotalTime" styleClass="lbl_duration" text="00:00" />
     </HBox>
    <Button fx:id="btnRepeat" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#repeat" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
@@ -68,7 +68,7 @@
                <String fx:value="btn_player" />
                <String fx:value="volume_icon" />
             </styleClass></Button>
-         <Slider id="slider_volume" fx:id="sliderVolume" blockIncrement="1" value="50.0" HBox.hgrow="ALWAYS" />
+         <Slider id="slider_volume" fx:id="sliderVolume" blockIncrement="1" value="25.0" HBox.hgrow="ALWAYS" />
       </children>
       <padding>
          <Insets right="25.0" />

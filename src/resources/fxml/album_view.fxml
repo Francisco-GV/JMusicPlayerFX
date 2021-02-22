@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import java.lang.String?>
+<GridPane id="root" fx:id="root" maxHeight="700.0" maxWidth="700.0" minHeight="300.0" minWidth="450.0"
+          stylesheets="@../css/albums/album_view_style.css" xmlns="http://javafx.com/javafx/15.0.1"
+          xmlns:fx="http://javafx.com/fxml/1">
+    <columnConstraints>
+        <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="180.0" prefWidth="250.0"/>
+        <ColumnConstraints halignment="CENTER" hgrow="ALWAYS"/>
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints minHeight="10.0" vgrow="ALWAYS"/>
+    </rowConstraints>
+    <VBox alignment="TOP_CENTER" prefHeight="400.0" prefWidth="250.0" spacing="15.0" GridPane.halignment="CENTER"
+          GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+        <padding>
+            <Insets top="15.0"/>
+        </padding>
+        <HBox alignment="CENTER">
+            <HBox fx:id="coverContainer" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity"
+                  minHeight="-Infinity" minWidth="-Infinity" prefHeight="180.0" prefWidth="180.0" HBox.hgrow="NEVER">
+                <Label id="lbl_pic" fx:id="lblCover" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                       HBox.hgrow="NEVER"/>
+            </HBox>
+        </HBox>
+        <Label id="album_name" fx:id="lblAlbumName" text="Album name"/>
+        <HBox alignment="CENTER" prefWidth="246.0" spacing="10.0">
+            <Label fx:id="lblArtistName" text="Artist"/>
+            <Label text="–"/>
+            <Label fx:id="lblYear" text="Year"/>
+        </HBox>
+        <HBox alignment="CENTER" prefWidth="246.0" spacing="10.0">
+            <Label fx:id="lblNSongs" text="N. songs"/>
+            <Label text="–"/>
+            <Label fx:id="lblDuration" text="Duration"/>
+        </HBox>
+    </VBox>
+    <TableView fx:id="tableSongs" stylesheets="@../css/element/custom_table.css" GridPane.columnIndex="1"
+               GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="NEVER">
+        <placeholder>
+            <Label text="No songs were found."/>
+        </placeholder>
+        <columns>
+            <TableColumn fx:id="numberColumn" editable="false" maxWidth="40.0" minWidth="40.0" prefWidth="40.0"
+                         sortable="false" text="No."/>
+            <TableColumn fx:id="titleColumn" editable="false" sortable="false" text="Title"/>
+            <TableColumn fx:id="durationColumn" editable="false" maxWidth="45.0" minWidth="45.0" prefWidth="45.0"
+                         sortable="false" text="Duration"/>
+        </columns>
+        <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+        <styleClass>
+            <String fx:value="songs_table"/>
+            <String fx:value="custom_table"/>
+        </styleClass>
+    </TableView>
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    </padding>
+</GridPane>

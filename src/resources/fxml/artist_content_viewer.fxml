@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox id="content_container" prefHeight="400.0" prefWidth="600.0" stylesheets="@../css/artists/artist_content_style.css"
+      xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <HBox id="top_content_container" fx:id="topPane" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0"
+          spacing="15.0" VBox.vgrow="NEVER">
+        <VBox HBox.hgrow="NEVER">
+            <Button id="return_button" fx:id="btnReturn" maxHeight="-Infinity" maxWidth="-Infinity"
+                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="15.0"
+                    prefWidth="23.0">
+                <VBox.margin>
+                    <Insets/>
+                </VBox.margin>
+            </Button>
+            <HBox.margin>
+                <Insets left="-5.0"/>
+            </HBox.margin>
+        </VBox>
+        <FlowPane id="pic_pane_content" fx:id="picturePane" alignment="CENTER" columnHalignment="CENTER"
+                  maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                  prefHeight="100.0" prefWidth="100.0" HBox.hgrow="NEVER">
+            <Label id="lbl_pic" fx:id="lblArtistPicture" alignment="CENTER" styleClass="default_picture"/>
+        </FlowPane>
+        <Label id="lbl_artist_name" fx:id="lblArtistName" text="Artist name" HBox.hgrow="ALWAYS"/>
+        <padding>
+            <Insets bottom="25.0" left="20.0" right="20.0" top="25.0"/>
+        </padding>
+    </HBox>
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+        <VBox alignment="TOP_CENTER" spacing="15.0">
+            <padding>
+                <Insets bottom="15.0" left="15.0" right="15.0" top="5.0"/>
+            </padding>
+            <VBox fx:id="albumContainer">
+                <Label styleClass="lbl_content_title" text="Albums"/>
+                <FlowPane fx:id="albumsPane" alignment="TOP_CENTER" columnHalignment="CENTER" hgap="15.0" vgap="15.0">
+                    <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+                    </padding>
+                </FlowPane>
+            </VBox>
+            <VBox fx:id="epContainer">
+                <Label styleClass="lbl_content_title" text="EP"/>
+                <FlowPane fx:id="epsPane" alignment="TOP_CENTER" columnHalignment="CENTER" hgap="15.0" vgap="15.0">
+                    <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+                    </padding>
+                </FlowPane>
+            </VBox>
+            <VBox fx:id="singleContainer">
+                <Label styleClass="lbl_content_title" text="Singles"/>
+                <FlowPane fx:id="singlesPane" alignment="TOP_CENTER" columnHalignment="CENTER" hgap="15.0" vgap="15.0">
+                    <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+                    </padding>
+                </FlowPane>
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</VBox>
