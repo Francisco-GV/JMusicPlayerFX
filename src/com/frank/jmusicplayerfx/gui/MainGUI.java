@@ -1,35 +1,46 @@
 package com.frank.jmusicplayerfx.gui;
 
-import com.frank.jmusicplayerfx.BackgroundTasker;
 import com.frank.jmusicplayerfx.JMusicPlayerFX;
+import com.frank.jmusicplayerfx.gui.element.AlbumContentViewer;
+import com.frank.jmusicplayerfx.gui.element.AlbumView;
+import com.frank.jmusicplayerfx.util.BackgroundTasker;
+import com.frank.jmusicplayerfx.util.Loader;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
+import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.Effect;
+import javafx.scene.effect.GaussianBlur;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MainGUI {
+    @FXML private StackPane root;
+
+    @FXML private BorderPane guiRoot;
     @FXML private Pane leftMenu;
     @FXML private Pane leftMenuSections;
     @FXML private Label graphicBtnHideMenu;
     @FXML private Label lblTitleContent;
+
+    @FXML private StackPane centerStackPane;
+    @FXML private Pane centerDefaultPane;
     @FXML private ScrollPane scrollPaneContainer;
 
     private boolean leftMenuMinimize;
@@ -38,9 +49,9 @@ public class MainGUI {
     private final SVGPath buttonLeftSVG;
     private final SVGPath buttonRightSVG;
 
-    private List<Pane> panes;
+    private final List<Pane> panes;
 
-    private final Map<String, Label> buttonLabelsMap = new HashMap<>();
+    private AlbumContentViewer albumContentViewer;
 
     public MainGUI() {
         buttonLeftSVG = new SVGPath();
@@ -56,9 +67,17 @@ public class MainGUI {
 
         buttonLeftSVG.setContent(leftPath);
         buttonRightSVG.setContent(rightPath);
+
+        panes = new ArrayList<>(5);
+
+        for (int i = 0; i < 5; i++) {
+            panes.add(null);
+        }
     }
 
     @FXML private void initialize() {
+        albumContentViewer = new AlbumContentViewer(this);
+
         sizeTimeline = new Timeline();
 
         graphicBtnHideMenu.setShape(buttonLeftSVG);
@@ -66,28 +85,22 @@ public class MainGUI {
         leftMenu.setPrefWidth(leftMenu.getMaxWidth());
 
         BackgroundTasker.executeInOtherThread(() -> Platform.runLater(() -> {
-            panes = new ArrayList<>();
-            try {
-                panes.add(SONGS, (Pane) loadFXML("/resources/fxml/pane_songs.fxml"));
-                panes.add(ARTISTS, (Pane) loadFXML("/resources/fxml/pane_artists.fxml"));
-                panes.add(ALBUMS, null);
-                panes.add(PLAYLISTS, null);
-                panes.add(FAVORITES, null);
-
+            addSection(SONGS, "/resources/fxml/pane_songs.fxml", () -> {
                 setContent(SONGS);
                 selectFirstButton();
+            });
+            addSection(ARTISTS, new PaneArtists());
+            addSection(ALBUMS, new PaneAlbums());
+            addSection(PLAYLISTS, (String) null);
+            addSection(FAVORITES, (String) null);
 
-                getSectionButtons().forEach(node -> {
-                    HBox pane = (HBox) node;
-                    pane.getChildren().forEach(children -> {
-                        if (children.getStyleClass().contains("lbl_title")) {
-                            buttonLabelsMap.put(node.getId(), (Label) children);
-                        }
-                    });
-                });
-            } catch(IOException ex) {
-                ex.getStackTrace();
+            try {
+                Loader.loadRoot("/resources/fxml/settings.fxml");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
+            centerStackPane.setViewOrder(5);
         }));
     }
 
@@ -104,10 +117,8 @@ public class MainGUI {
         if (leftMenuMinimize) {
             value = new KeyValue(writableValue, leftMenu.getMaxWidth());
             frame = new KeyFrame(duration, value);
-
             hideText(false);
             shape = buttonLeftSVG;
-
             leftMenuMinimize = false;
         } else {
             value = new KeyValue(writableValue, leftMenu.getMinWidth());
@@ -126,13 +137,13 @@ public class MainGUI {
             if (node instanceof HBox) {
                 pane = (HBox) node;
 
-                Label label = buttonLabelsMap.get(pane.getId());
+                Label label = (Label) pane.getChildren().get(1);
                 if (hide) {
-                    pane.getChildren().removeAll(label);
+                    label.setVisible(false);
+                    label.setManaged(false);
                 } else {
-                    if (!pane.getChildren().contains(label)) {
-                        pane.getChildren().add(label);
-                    }
+                    label.setVisible(true);
+                    label.setManaged(true);
                 }
             }
         }
@@ -166,28 +177,87 @@ public class MainGUI {
     }
 
     private void setContent(int index) {
+        resetCenterDefaultPane();
+
         lblTitleContent.setText(TITLES[index]);
         Pane content = panes.get(index);
 
         scrollPaneContainer.setContent(content);
     }
 
+    public void setCenterPane(Pane pane) {
+        centerStackPane.getChildren().setAll(pane);
+    }
+
+    public void resetCenterDefaultPane() {
+        blurDefaultPane(false);
+        setCenterPane(centerDefaultPane);
+    }
+
+    public void viewAlbumContent(AlbumView albumView) {
+        albumContentViewer.showAlbumView(albumView);
+
+        if (!centerStackPane.getChildren().contains(albumContentViewer)) {
+            centerStackPane.getChildren().add(albumContentViewer);
+            blurDefaultPane(true);
+        }
+    }
+
+    public void blurDefaultPane(boolean doBlur) {
+        Effect blur = null;
+        if (doBlur) blur = new GaussianBlur(30);
+        centerDefaultPane.setEffect(blur);
+        centerStackPane.getChildren().get(0).setEffect(blur);
+    }
+
+    private void addSection(int index, String source, Runnable onFinish) {
+        Task<Pane> paneTask = new Task<>() {
+            @Override
+            protected Pane call() throws Exception {
+                return Loader.loadRoot(source);
+            }
+        };
+
+        BackgroundTasker.executeGUITaskOnce(paneTask, event -> {
+            Pane pane = paneTask.getValue();
+            panes.set(index, pane);
+
+            if (onFinish != null) onFinish.run();
+        });
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private void addSection(int index, Pane pane) {
+        BackgroundTasker.executeInOtherThread(() -> panes.set(index, pane));
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private void addSection(int index, String source) {
+        addSection(index, source, null);
+    }
+
     @FXML private void openAuthorLink() {
         JMusicPlayerFX.getInstance().getHostServices().showDocument("https://twitter.com/FrankGV42");
     }
 
-    private Parent loadFXML(String path) throws IOException {
-        return FXMLLoader.load(getClass().getResource(path));
+    @FXML private void openSettings() {
+        Effect colorAdjust = new ColorAdjust(0, 0, -0.8, 0);
+
+        guiRoot.setEffect(colorAdjust);
+    }
+
+    public StackPane getCenterStackPane() {
+        return centerStackPane;
     }
 
     private final static String[] TITLES = new String[] {
             "Songs", "Artists", "Albums", "Playlists", "Favorites", "Unknown"
     };
 
-    private final static int SONGS = 0;
-    private final static int ARTISTS = 1;
-    private final static int ALBUMS = 2;
-    private final static int PLAYLISTS = 3;
-    private final static int FAVORITES = 4;
-    private final static int UNKNOWN = 5;
+    private static final int SONGS = 0;
+    private static final int ARTISTS = 1;
+    private static final int ALBUMS = 2;
+    private static final int PLAYLISTS = 3;
+    private static final int FAVORITES = 4;
+    private static final int UNKNOWN = 5;
 }
