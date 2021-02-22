@@ -73,27 +73,38 @@ public final class GlobalPlayer {
     }
 
     public void initNewAudio(Playlist playList, AudioFile audioFile) {
-        int index = 0;
+        initNewAudio(playList, audioFile, null);
+    }
 
-        if (currentPlaylist != playList) {
-            setCurrentPlaylist(playList);
-        }
-        if (playList != null) {
-            index = playList.indexOf(audioFile);
-        }
+    public void initNewAudio(Playlist playlist, AudioFile audioFile, Runnable onLoad) {
+        MediaPlayer mediaPlayer = new MediaPlayer(audioFile.getMedia());
 
-        setCurrentIndex(index);
+        mediaPlayer.setOnReady(() -> {
+            int index = 0;
 
-        currentAudio.set(audioFile);
-        mediaPlayer.set(audioFile.getMediaPlayer());
+            if (currentPlaylist != playlist) {
+                setCurrentPlaylist(playlist);
+            }
+            if (playlist != null) {
+                index = playlist.indexOf(audioFile);
+            }
+            setCurrentIndex(index);
+            currentAudio.set(audioFile);
+            mediaPlayerProperty().set(mediaPlayer);
+
+            if (onLoad != null) onLoad.run();
+        });
     }
 
     private void initNewAudio(int index) {
         AudioFile audioFile = getCurrentPlaylist().get(index);
-        setCurrentIndex(index);
+        MediaPlayer mediaPlayer = new MediaPlayer(audioFile.getMedia());
 
-        currentAudio.set(audioFile);
-        mediaPlayer.set(audioFile.getMediaPlayer());
+        mediaPlayer.setOnReady(() -> {
+            setCurrentIndex(index);
+            currentAudio.set(audioFile);
+            mediaPlayerProperty().set(mediaPlayer);
+        });
     }
 
     public void play() {
