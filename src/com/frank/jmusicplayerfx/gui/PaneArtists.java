@@ -1,112 +1,132 @@
 package com.frank.jmusicplayerfx.gui;
 
 import com.frank.jmusicplayerfx.JMusicPlayerFX;
-import com.frank.jmusicplayerfx.Util;
-import com.frank.jmusicplayerfx.media.AudioLoader.Info.Artist;
-import javafx.collections.FXCollections;
+import com.frank.jmusicplayerfx.gui.element.ArtistContentViewer;
+import com.frank.jmusicplayerfx.gui.element.ArtistElement;
+import com.frank.jmusicplayerfx.gui.element.extra.NoFoundPane;
+import com.frank.jmusicplayerfx.util.Loader;
+import com.frank.jmusicplayerfx.util.Util;
+import com.frank.jmusicplayerfx.AudioLoader.Info.Artist;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Stop;
 
 import java.io.IOException;
-import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class PaneArtists {
-    @FXML private Pane root;
+public class PaneArtists extends FlowPane {
+    private final ObservableList<Artist> artistsList;
 
-    private ObservableList<Artist> artistsList;
-    @FXML private void initialize() {
+    private final NoFoundPane noFoundPane;
+
+    public PaneArtists() {
+        noFoundPane = new NoFoundPane("artists");
         artistsList = JMusicPlayerFX.getInstance().getAudioLoader().getInfo().getArtists();
+        initPaneArtists();
+    }
 
-        artistsList.addListener(new ListChangeListener<>() {
-            @Override
-            public void onChanged(Change<? extends Artist> change) {
-                root.getChildren().clear();
+    private void initPaneArtists() {
+        this.setPadding(new Insets(15));
+        this.setHgap(15);
+        this.setVgap(15);
+        this.setColumnHalignment(HPos.CENTER);
+        this.setRowValignment(VPos.TOP);
+        this.setAlignment(Pos.TOP_CENTER);
 
-                artistsList.forEach(artist -> {
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass()
-                                .getResource("/resources/fxml/artist_element.fxml"));
-                        loader.setController(new ArtistElement(artist));
-                        Pane pane = loader.load();
+        addArtists();
+        artistsList.addListener(this::updateArtistsEvent);
+    }
 
-                        root.getChildren().add(pane);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+    private void updateArtistsEvent(ListChangeListener.Change<? extends Artist> change) {
+        while (change.next()) {
+            List<? extends Artist> addedArtists = change.getAddedSubList();
+            List<? extends Artist> removedArtists = change.getRemoved();
 
-                sortArtists();
+            addedArtists.forEach(added -> {
+                ArtistElement artistElement = new ArtistElement(added);
+                if (!getArtistsElements().contains(artistElement)) {
+                    addArtistElement(artistElement);
+                }
+            });
+
+            List<ArtistElement> toRemove = getArtistsElements().stream()
+                    .filter(element -> removedArtists.contains(element.getArtist()))
+                    .collect(Collectors.toList());
+
+            this.getChildren().removeAll(toRemove);
+
+            if (change.getList().isEmpty()) {
+                this.getChildren().setAll(noFoundPane);
+            } else {
+                this.getChildren().remove(noFoundPane);
             }
-        });
+
+            sortArtists();
+        }
+    }
+
+    private void addArtistElement(ArtistElement artistElement) {
+        ArtistContentViewer artistContentViewer = new ArtistContentViewer(artistElement.getArtist());
+
+        Pane artistPane = null;
+        try {
+            artistPane = Loader.loadRoot("/resources/fxml/artist_content_viewer.fxml", artistContentViewer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        artistElement.setArtistContent(artistPane);
+
+        LinearGradient gradient = Util.randomGradient();
+        artistElement.setGradient(gradient);
+        artistContentViewer.setGradient(gradient);
+
+        this.getChildren().add(artistElement);
+    }
+
+    private void addArtists() {
+        this.getChildren().clear();
+
+        if (artistsList.isEmpty()) {
+            this.getChildren().setAll(noFoundPane);
+        } else {
+            this.getChildren().remove(noFoundPane);
+            artistsList.forEach(artist -> {
+                ArtistElement artistElement = new ArtistElement(artist);
+                addArtistElement(artistElement);
+            });
+
+            sortArtists();
+        }
     }
 
     private void sortArtists() {
-        ObservableList<Node> sortedList =
-                FXCollections.observableArrayList(root.getChildren());
+        List<ArtistElement> artistElements = getArtistsElements();
 
-        sortedList.sort(new Comparator<>() {
-            @Override
-            public int compare(Node o1, Node o2) {
-                Label lblo1 = getLblName((Pane) o1);
-                Label lblo2 = getLblName((Pane) o2);
+        artistElements.sort((o1, o2) -> {
+            if (o1 != null && o2 != null) {
+                Label lblo1 = o1.getLblName();
+                Label lblo2 = o2.getLblName();
 
                 return lblo1.getText().compareTo(lblo2.getText());
-            }
-
-            private Label getLblName(Pane pane) {
-                return (Label) pane.getChildren().stream()
-                        .filter(node -> node.getId().equals("lbl_name"))
-                        .findFirst().orElse(null);
-            }
+            } else return 0;
         });
 
-        root.getChildren().setAll(sortedList);
+        this.getChildren().setAll(artistElements);
     }
 
-    @SuppressWarnings("unused")
-    public static class ArtistElement {
-        private final Artist artist;
-        @FXML private Label lblPicture;
-        @FXML private Label lblName;
-
-        @FXML private Pane root;
-        @FXML private Pane picPane;
-
-        public ArtistElement(Artist artist) {
-            this.artist = artist;
-        }
-
-        @FXML private void initialize() {
-            lblName.setText(artist.getName());
-
-            Color color1 = Util.randomPastelColor();
-            Color color2 = Util.randomPastelColor();
-
-            Stop[] stops = new Stop[] {
-                    new Stop(0, color1), new Stop(1, color2)
-            };
-            LinearGradient gradient = new LinearGradient(0, 0, 1, 1, true, CycleMethod.NO_CYCLE, stops);
-
-            BorderStroke borderStroke = new BorderStroke(gradient, BorderStrokeStyle.SOLID,
-                    new CornerRadii(50, true), new BorderWidths(2));
-            picPane.setBorder(new Border(borderStroke));
-            lblPicture.setBackground(new Background(new BackgroundFill(gradient, null, null)));
-        }
+    private List<ArtistElement> getArtistsElements() {
+        return this.getChildren().stream()
+                .filter(node -> node instanceof ArtistElement)
+                .map(node -> (ArtistElement) node)
+                .collect(Collectors.toList());
     }
 }
