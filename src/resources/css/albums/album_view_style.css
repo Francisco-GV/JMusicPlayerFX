@@ -1,7 +1,5 @@
 #root {
-    -fx-background-color : rgb(24, 24, 24);
-    /*-fx-border-color     : rgb(250, 50, 50);*/
-    /*-fx-effect           : dropshadow(gaussian, #1e1e1e, 60, 0, 10, 10);*/
+    -fx-background-color : #222222;
 }
 
 .label {
@@ -11,12 +9,6 @@
 #album_name {
     -fx-font-size   : 19px;
     -fx-font-weight : bold;
-}
-
-.songs_table .column-header-background {
-    -fx-min-height  : 0;
-    -fx-pref-height : 0;
-    -fx-max-height  : 0;
 }
 
 #lbl_pic {

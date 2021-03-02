@@ -20,14 +20,14 @@
     -fx-text-alignment  : center;
     -fx-alignment       : top-center;
     -fx-text-fill       : white;
-    -fx-font-size       : 18px;
-    -fx-pref-width      : 145;
+    -fx-font-size       : 15px;
+    -fx-pref-width      : 130px;
     -fx-wrap-text       : true;
     -fx-content-display : text_only;
 }
 
 #picture_container {
-    -fx-width       : 130px;
+    -fx-width       : 120px;
     -fx-height      : -fx-width;
 
     -fx-pref-width  : -fx-width;
