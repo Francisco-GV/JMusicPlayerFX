@@ -1,6 +1,6 @@
-package com.frank.jmusicplayerfx.gui.element;
+package com.frank.jmusicplayerfx.gui.element.artist;
 
-import com.frank.jmusicplayerfx.AudioLoader.Info.Artist;
+import com.frank.jmusicplayerfx.Data.Artist;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;

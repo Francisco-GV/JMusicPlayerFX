@@ -1,12 +1,14 @@
-package com.frank.jmusicplayerfx.gui.element;
+package com.frank.jmusicplayerfx.gui.element.album;
 
-import com.frank.jmusicplayerfx.AudioLoader.Info.Album;
+import com.frank.jmusicplayerfx.Data.Album;
 import com.frank.jmusicplayerfx.media.AudioFile;
 import com.frank.jmusicplayerfx.media.Playlist;
 import com.frank.jmusicplayerfx.util.BackgroundTasker;
 import com.frank.jmusicplayerfx.util.ImageScaler;
 import com.frank.jmusicplayerfx.util.Util;
+import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -26,6 +28,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.shape.Rectangle;
+
+import java.util.Comparator;
 
 @SuppressWarnings("unused")
 public class AlbumView {
@@ -58,8 +62,9 @@ public class AlbumView {
         lblAlbumName.setText(album.getName());
         lblArtistName.setText(album.getAlbumArtist().getName());
         lblYear.textProperty().bind(album.yearProperty().asString());
-        lblNSongs.textProperty().bind(album.getSongs().sizeProperty().asString("%d songs"));
-        lblDuration.textProperty().bind(album.totalDurationFormattedProperty());
+        lblNSongs.textProperty().bind(album.songsListProperty().sizeProperty().asString("%d songs"));
+        lblDuration.textProperty().bind(Bindings.createStringBinding(() -> Util.formatTime(album.totalDurationProperty().get()) + " minutes",
+                album.totalDurationProperty()));
 
         numberColumn.setCellValueFactory(cellData -> cellData.getValue().trackNumberProperty().asString("%d.-"));
         titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
@@ -79,10 +84,8 @@ public class AlbumView {
             }
         });
 
-        tableSongs.getColumns().forEach(column -> column.setReorderable(false));
-        numberColumn.setSortType(TableColumn.SortType.ASCENDING);
-        tableSongs.getSortOrder().add(numberColumn);
-        Util.initMusicTable(new Playlist(album.getName(), album.getSongs().get()), tableSongs);
+        SortedList<AudioFile> songsList = new SortedList<>(album.songsListProperty());
+        Util.initMusicTable(new Playlist(album.getName(), songsList), tableSongs);
     }
 
     public void setCoverListener() {
@@ -129,6 +132,10 @@ public class AlbumView {
 
     public Pane getRoot() {
         return root;
+    }
+
+    public TableView<AudioFile> getTableSongs() {
+        return tableSongs;
     }
 
     public void setGradient(LinearGradient gradient) {

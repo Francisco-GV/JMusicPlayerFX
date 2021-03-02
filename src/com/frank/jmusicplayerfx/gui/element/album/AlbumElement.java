@@ -1,9 +1,10 @@
-package com.frank.jmusicplayerfx.gui.element;
+package com.frank.jmusicplayerfx.gui.element.album;
 
-import com.frank.jmusicplayerfx.AudioLoader.Info.Album;
+import com.frank.jmusicplayerfx.Data.Album;
 import com.frank.jmusicplayerfx.util.BackgroundTasker;
 import com.frank.jmusicplayerfx.util.ImageScaler;
 import com.frank.jmusicplayerfx.util.Util;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -87,46 +88,48 @@ public class AlbumElement extends VBox {
     }
 
     public void showCover(boolean show) {
-        ObservableList<String> classes = lblPicture.getStyleClass();
-        if (show) {
-            classes.removeAll("default_picture");
-            classes.add("picture");
+        Platform.runLater(() -> {
+            ObservableList<String> classes = lblPicture.getStyleClass();
+            if (show) {
+                classes.removeAll("default_picture");
+                classes.add("picture");
 
-            pictureContainer.setBorder(null);
+                pictureContainer.setBorder(null);
 
-            Rectangle rectangle = new Rectangle(125, 125);
-            rectangle.setFill(new ImagePattern(album.coverProperty().get(), 0, 0, 125, 125, true));
-            lblPicture.setGraphic(rectangle);
+                Rectangle rectangle = new Rectangle(125, 125);
+                rectangle.setFill(new ImagePattern(album.coverProperty().get(), 0, 0, 125, 125, true));
+                lblPicture.setGraphic(rectangle);
 
-            Task<Image> imageTask = new Task<>() {
-                @Override
-                protected Image call() {
-                    return ImageScaler.scaleImage(album.coverProperty().get(), 125, 125);
-                }
-            };
+                Task<Image> imageTask = new Task<>() {
+                    @Override
+                    protected Image call() {
+                        return ImageScaler.scaleImage(album.coverProperty().get(), 125, 125);
+                    }
+                };
 
-            BackgroundTasker.executeGUITaskOnce(imageTask, evt -> {
-                ImagePattern imgPattern = new ImagePattern(imageTask.getValue());
+                BackgroundTasker.executeGUITaskOnce(imageTask, evt -> {
+                    ImagePattern imgPattern = new ImagePattern(imageTask.getValue());
 
-                Rectangle rectCover = new Rectangle(125, 125);
-                rectCover.setArcHeight(borderRadius);
-                rectCover.setArcWidth(borderRadius);
-                rectCover.setFill(imgPattern);
-                rectCover.setEffect(new DropShadow(10, 3, 3, Color.grayRgb(15)));
+                    Rectangle rectCover = new Rectangle(125, 125);
+                    rectCover.setArcHeight(borderRadius);
+                    rectCover.setArcWidth(borderRadius);
+                    rectCover.setFill(imgPattern);
+                    rectCover.setEffect(new DropShadow(10, 3, 3, Color.grayRgb(15)));
 
-                lblPicture.setBackground(null);
-                lblPicture.setGraphic(rectCover);
-            });
-        } else {
-            classes.removeAll("picture");
-            classes.add("default_picture");
+                    lblPicture.setBackground(null);
+                    lblPicture.setGraphic(rectCover);
+                });
+            } else {
+                classes.removeAll("picture");
+                classes.add("default_picture");
 
-            BorderStroke borderStroke = new BorderStroke(gradient, BorderStrokeStyle.SOLID,
-                    new CornerRadii(borderRadius, false), new BorderWidths(1));
-            pictureContainer.setBorder(new Border(borderStroke));
+                BorderStroke borderStroke = new BorderStroke(gradient, BorderStrokeStyle.SOLID,
+                        new CornerRadii(borderRadius, false), new BorderWidths(1));
+                pictureContainer.setBorder(new Border(borderStroke));
 
-            lblPicture.setBackground(new Background(new BackgroundFill(gradient, null, null)));
-        }
+                lblPicture.setBackground(new Background(new BackgroundFill(gradient, null, null)));
+            }
+        });
     }
 
     public Label getLblName() {

@@ -1,11 +1,14 @@
-package com.frank.jmusicplayerfx.gui.element;
+package com.frank.jmusicplayerfx.gui;
 
-import com.frank.jmusicplayerfx.AudioLoader.Info.Album;
-import com.frank.jmusicplayerfx.AudioLoader.Info.Artist;
+import com.frank.jmusicplayerfx.Data.Album;
+import com.frank.jmusicplayerfx.Data.Artist;
+import com.frank.jmusicplayerfx.gui.element.album.AlbumElement;
+import com.frank.jmusicplayerfx.gui.element.album.AlbumView;
 import com.frank.jmusicplayerfx.util.BackgroundTasker;
 import com.frank.jmusicplayerfx.util.ImageScaler;
 import com.frank.jmusicplayerfx.util.Loader;
 import com.frank.jmusicplayerfx.util.Util;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -151,7 +154,6 @@ public class ArtistContentViewer {
     }
 
     private void addAlbumElement(AlbumElement albumElement) {
-        albumElement.getChildren().remove(albumElement.getLblArtist());
         ObjectProperty<Album.Type> type = albumElement.getAlbum().typeProperty();
 
         type.addListener((obs, old, newType) -> {
@@ -159,23 +161,26 @@ public class ArtistContentViewer {
             addAlbumElement(albumElement);
         });
 
-        AlbumView albumView = new AlbumView(albumElement.getAlbum());
-        albumView.setGradient(albumElement.getGradient());
-
-        BackgroundTasker.executeInOtherThread(() -> {
-            try {
-                Loader.loadRoot("/resources/fxml/album_view.fxml", albumView);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            albumElement.setAlbumView(albumView);
-        });
-
         switch (type.get()) {
             case SINGLE -> singlesPane.getChildren().add(albumElement);
             case EP     -> epsPane.getChildren().add(albumElement);
             case ALBUM  -> albumsPane.getChildren().add(albumElement);
         }
+
+        Platform.runLater(() -> {
+            albumElement.getChildren().remove(albumElement.getLblArtist());
+            AlbumView albumView = new AlbumView(albumElement.getAlbum());
+            albumView.setGradient(albumElement.getGradient());
+
+            BackgroundTasker.executeInOtherThread(() -> {
+                try {
+                    Loader.loadRoot("/resources/fxml/album_view.fxml", albumView);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                albumElement.setAlbumView(albumView);
+            });
+        });
     }
 
     private void removeAlbumElements(Collection<AlbumElement> albumElements) {
