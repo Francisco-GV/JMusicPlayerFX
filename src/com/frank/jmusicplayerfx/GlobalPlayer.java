@@ -104,6 +104,8 @@ public final class GlobalPlayer {
             setCurrentIndex(index);
             currentAudio.set(audioFile);
             mediaPlayerProperty().set(mediaPlayer);
+
+            getMediaPlayer().play();
         });
     }
 
