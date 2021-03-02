@@ -1,10 +1,10 @@
 package com.frank.jmusicplayerfx.gui;
 
 import com.frank.jmusicplayerfx.JMusicPlayerFX;
-import com.frank.jmusicplayerfx.gui.element.AlbumElement;
-import com.frank.jmusicplayerfx.gui.element.AlbumView;
+import com.frank.jmusicplayerfx.gui.element.album.AlbumElement;
+import com.frank.jmusicplayerfx.gui.element.album.AlbumView;
 import com.frank.jmusicplayerfx.gui.element.extra.NoFoundPane;
-import com.frank.jmusicplayerfx.AudioLoader.Info.Album;
+import com.frank.jmusicplayerfx.Data.Album;
 import com.frank.jmusicplayerfx.util.BackgroundTasker;
 import com.frank.jmusicplayerfx.util.Loader;
 import javafx.application.Platform;
@@ -63,9 +63,9 @@ public class PaneAlbums extends FlowPane {
             this.getChildren().removeAll(toRemove);
 
             if (change.getList().isEmpty()) {
-                this.getChildren().setAll(noFoundPane);
+                getChildren().setAll(noFoundPane);
             } else {
-                this.getChildren().remove(noFoundPane);
+                getChildren().remove(noFoundPane);
             }
             sortAlbums();
         }
@@ -85,9 +85,7 @@ public class PaneAlbums extends FlowPane {
                 }
                 albumElement.setAlbumView(albumView);
             });
-
-
-            this.getChildren().add(albumElement);
+            if (!getChildren().contains(albumElement)) getChildren().add(albumElement);
         });
     }
 
@@ -124,9 +122,11 @@ public class PaneAlbums extends FlowPane {
     }
 
     private List<AlbumElement> getAlbumsElements() {
-        return this.getChildren().stream()
-                .filter(node -> node instanceof AlbumElement)
-                .map(node -> (AlbumElement) node)
-                .collect(Collectors.toList());
+        synchronized (this.getChildrenUnmodifiable()) {
+            return this.getChildrenUnmodifiable().stream()
+                    .filter(node -> node instanceof AlbumElement)
+                    .map(node -> (AlbumElement) node)
+                    .collect(Collectors.toList());
+        }
     }
 }
