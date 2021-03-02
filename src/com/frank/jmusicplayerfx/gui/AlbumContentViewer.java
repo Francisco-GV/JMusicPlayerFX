@@ -1,6 +1,6 @@
-package com.frank.jmusicplayerfx.gui.element;
+package com.frank.jmusicplayerfx.gui;
 
-import com.frank.jmusicplayerfx.gui.MainGUI;
+import com.frank.jmusicplayerfx.gui.element.album.AlbumView;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -11,7 +11,6 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.SVGPath;
 
 public class AlbumContentViewer extends VBox {
     private final HBox topBox;
@@ -29,7 +28,7 @@ public class AlbumContentViewer extends VBox {
     }
 
     private void init() {
-        BackgroundFill fill = new BackgroundFill(Color.rgb(100, 100, 100, 0.1), null, null);
+        BackgroundFill fill = new BackgroundFill(Color.rgb(0, 0, 0, 0.4), null, null);
 
         this.setAlignment(Pos.CENTER);
         this.setPadding(new Insets(15, 15, 0, 15));
@@ -37,13 +36,9 @@ public class AlbumContentViewer extends VBox {
         this.setFillWidth(true);
         this.setBackground(new Background(fill));
 
-        SVGPath exitPath = new SVGPath();
-
-        exitPath.setContent("M 19.061,7.061 16.939,4.939 12,9.879 7.061,4.939 4.939,7.061 " +
-                "9.879,12 4.939,16.939 7.061,19.061 12,14.121 16.939,19.061 19.061,16.939 " +
-                "14.121,12 Z");
-
-        btnExit.setShape(exitPath);
+        btnExit.getStylesheets().add("/resources/css/element/custom_button.css");
+        btnExit.getStylesheets().add("/resources/css/icons.css");
+        btnExit.getStyleClass().addAll("exit", "default_button");
         btnExit.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnExit.setPadding(new Insets(0));
 
@@ -51,7 +46,6 @@ public class AlbumContentViewer extends VBox {
 
         btnExit.setPrefSize(btnSize, btnSize);
         btnExit.setMinSize(btnSize, btnSize);
-        btnExit.setStyle("-fx-background-color: white");
         btnExit.setOnAction(e -> {
             mainGUI.getCenterStackPane().getChildren().remove(this);
             mainGUI.blurDefaultPane(false);
@@ -68,5 +62,7 @@ public class AlbumContentViewer extends VBox {
 
     public void showAlbumView(AlbumView albumView) {
         this.getChildren().set(1, albumView.getRoot());
+        albumView.getTableSongs().sort();
+
     }
 }
