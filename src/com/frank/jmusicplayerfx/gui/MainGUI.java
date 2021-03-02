@@ -1,8 +1,7 @@
 package com.frank.jmusicplayerfx.gui;
 
 import com.frank.jmusicplayerfx.JMusicPlayerFX;
-import com.frank.jmusicplayerfx.gui.element.AlbumContentViewer;
-import com.frank.jmusicplayerfx.gui.element.AlbumView;
+import com.frank.jmusicplayerfx.gui.element.album.AlbumView;
 import com.frank.jmusicplayerfx.util.BackgroundTasker;
 import com.frank.jmusicplayerfx.util.Loader;
 import javafx.animation.KeyFrame;
@@ -16,10 +15,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.Effect;
 import javafx.scene.effect.GaussianBlur;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -33,11 +30,14 @@ import java.util.List;
 public class MainGUI {
     @FXML private StackPane root;
 
-    @FXML private BorderPane guiRoot;
     @FXML private Pane leftMenu;
     @FXML private Pane leftMenuSections;
     @FXML private Label graphicBtnHideMenu;
     @FXML private Label lblTitleContent;
+
+    @FXML private Pane guiRoot;
+    private PaneArtists paneArtists;
+    private Pane settingsPane;
 
     @FXML private StackPane centerStackPane;
     @FXML private Pane centerDefaultPane;
@@ -89,13 +89,16 @@ public class MainGUI {
                 setContent(SONGS);
                 selectFirstButton();
             });
-            addSection(ARTISTS, new PaneArtists());
+
+            paneArtists = new PaneArtists();
+            addSection(ARTISTS, paneArtists);
+
             addSection(ALBUMS, new PaneAlbums());
             addSection(PLAYLISTS, (String) null);
             addSection(FAVORITES, (String) null);
 
             try {
-                Loader.loadRoot("/resources/fxml/settings.fxml");
+                settingsPane = Loader.loadRoot("/resources/fxml/settings.fxml");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -182,6 +185,7 @@ public class MainGUI {
         lblTitleContent.setText(TITLES[index]);
         Pane content = panes.get(index);
 
+        scrollPaneContainer.setVvalue(0);
         scrollPaneContainer.setContent(content);
     }
 
@@ -241,13 +245,26 @@ public class MainGUI {
     }
 
     @FXML private void openSettings() {
-        Effect colorAdjust = new ColorAdjust(0, 0, -0.8, 0);
-
+        Effect colorAdjust = new GaussianBlur(30);
         guiRoot.setEffect(colorAdjust);
+
+        if (!root.getChildren().contains(settingsPane)) {
+            root.getChildren().add(settingsPane);
+        }
+    }
+
+    public void closeSettings() {
+        guiRoot.setEffect(null);
+
+        root.getChildren().remove(settingsPane);
     }
 
     public StackPane getCenterStackPane() {
         return centerStackPane;
+    }
+
+    public PaneArtists getPaneArtists() {
+        return paneArtists;
     }
 
     private final static String[] TITLES = new String[] {
