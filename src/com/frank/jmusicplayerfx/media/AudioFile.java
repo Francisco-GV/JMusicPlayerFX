@@ -1,8 +1,7 @@
 package com.frank.jmusicplayerfx.media;
 
-import com.frank.jmusicplayerfx.AudioLoader;
+import com.frank.jmusicplayerfx.Data;
 import com.frank.jmusicplayerfx.JMusicPlayerFX;
-import com.frank.jmusicplayerfx.util.BackgroundTasker;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
@@ -22,8 +21,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
-import static com.frank.jmusicplayerfx.AudioLoader.Info.Album;
-import static com.frank.jmusicplayerfx.AudioLoader.Info.Artist;
+import static com.frank.jmusicplayerfx.Data.Album;
+import static com.frank.jmusicplayerfx.Data.Artist;
 import static com.frank.jmusicplayerfx.util.Util.formatTime;
 
 @SuppressWarnings("unused")
@@ -39,9 +38,12 @@ public class AudioFile {
     private final ObjectProperty<Duration> duration;
     private final ObjectProperty<Image> cover;
 
-    private final Media media;
+    private Media media;
+    private final File file;
 
     public AudioFile(File file) {
+        this.file = file;
+
         title = new ReadOnlyStringWrapper(UNKNOWN_TITLE);
         artist = new ReadOnlyStringWrapper(UNKNOWN_ARTIST);
         albumArtist = new ReadOnlyStringWrapper(UNKNOWN_ARTIST);
@@ -53,8 +55,6 @@ public class AudioFile {
         durationFormatted = new ReadOnlyStringWrapper("00:00");
         cover = new ReadOnlyObjectWrapper<>(null);
         durationFormatted.bind(Bindings.createStringBinding(() -> formatTime(duration.get()), durationProperty()));
-
-        this.media = new Media(file.toURI().toString());
 
         ID3v2 id3v2 = null;
         try {
@@ -75,41 +75,54 @@ public class AudioFile {
             title.set(id3v2.getTitle() != null && !id3v2.getTitle().isBlank()
                     ? id3v2.getTitle() : UNKNOWN_TITLE);
             artist.set(id3v2.getArtist() != null && !id3v2.getArtist().isBlank()
-                    ? id3v2.getArtist() : UNKNOWN_ARTIST);
+                    ? id3v2.getArtist().trim() : UNKNOWN_ARTIST);
             albumArtist.set(id3v2.getAlbumArtist() != null && !id3v2.getAlbumArtist().isBlank()
-                    ? id3v2.getAlbumArtist() : UNKNOWN_ARTIST);
+                    ? id3v2.getAlbumArtist().trim() : UNKNOWN_ARTIST);
             album.set(id3v2.getAlbum() != null && !id3v2.getAlbum().isBlank()
-                    ? id3v2.getAlbum() : UNKNOWN_ALBUM);
+                    ? id3v2.getAlbum().trim() : UNKNOWN_ALBUM);
             genre.set(id3v2.getGenreDescription() != null && !id3v2.getGenreDescription().isBlank()
                     ? id3v2.getGenreDescription() : UNKNOWN_GENRE);
             year.set(id3v2.getYear() != null
                     ? Integer.parseInt(id3v2.getYear()) : 0);
             trackNumber.set(id3v2.getTrack() != null
                     ? Integer.parseInt(id3v2.getTrack()) : 1);
-
-            byte[] imageData = id3v2.getAlbumImage();
-            if (imageData != null) {
-                Image img = new Image(new ByteArrayInputStream(imageData));
-                cover.set(img);
-            }
-
         }
 
         createArtistAndAlbum();
+
+        if (id3v2 != null) {
+            Data data = JMusicPlayerFX.getInstance().getAudioLoader().getInfo();
+
+            Artist albumArtist = data.getOrReturnArtist(getAlbumArtist());
+            Album album = data.getOrReturnAlbum(getAlbum(), albumArtist);
+
+            if (album.coverProperty().get() == null) {
+                loadCover(id3v2);
+                album.coverProperty().set(getCover());
+            }
+        }
+    }
+
+    private void loadCover(ID3v2 id3v2) {
+        byte[] imageData = id3v2.getAlbumImage();
+        if (imageData != null) {
+            Image img = new Image(new ByteArrayInputStream(imageData));
+            cover.set(img);
+        }
     }
 
     private void createArtistAndAlbum() {
-        AudioLoader.Info info = JMusicPlayerFX.getInstance().getAudioLoader().getInfo();
+        Data data = JMusicPlayerFX.getInstance().getAudioLoader().getInfo();
 
-        Artist artist = info.getOrReturnArtist(new Artist(getArtist()));
-        Artist albumArtist = info.getOrReturnArtist(new Artist(getAlbumArtist()));
+        Artist artist = data.getOrReturnArtist(getArtist());
+        Artist albumArtist = data.getOrReturnArtist(getAlbumArtist());
 
         if (getAlbumArtist().equals(UNKNOWN_ARTIST)) {
             String artistName = getArtist().split(";")[0];
-            albumArtist = info.getOrReturnArtist(new Artist((artistName.trim())));
+            albumArtist = data.getOrReturnArtist(artistName);
         }
 
-        Album album = info.getOrReturnAlbum(new Album(getAlbum().trim(), albumArtist));
+        Album album = data.getOrReturnAlbum(getAlbum(), albumArtist);
 
         if (getCover() != null && album.coverProperty().get() == null) {
             album.coverProperty().set(getCover());
@@ -119,12 +132,12 @@ public class AudioFile {
         }
 
         if (!getAlbum().equals(UNKNOWN_ALBUM)) {
-            album.addSong(AudioFile.this);
-            info.registerAlbum(album);
+            album.addSong(this);
+            data.registerAlbum(album);
             artist.addAlbum(album);
         }
 
-        info.registerArtist(artist);
+        data.registerArtist(artist);
     }
 
     @Override
@@ -133,6 +146,10 @@ public class AudioFile {
     }
 
     public Media getMedia() {
+        if (media == null) {
+            this.media = new Media(file.toURI().toString());
+        }
+
         return media;
     }
 
