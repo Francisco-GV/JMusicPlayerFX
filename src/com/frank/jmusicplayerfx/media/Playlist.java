@@ -2,18 +2,17 @@ package com.frank.jmusicplayerfx.media;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
-import java.util.Collections;
+import javafx.collections.transformation.SortedList;
 
 public class Playlist {
     private String name;
-    private ObservableList<AudioFile> audioFiles;
+    private SortedList<AudioFile> audioFiles;
 
     public Playlist(String name) {
         this(name, null);
     }
 
-    public Playlist(String name, ObservableList<AudioFile> audioFiles) {
+    public Playlist(String name, SortedList<AudioFile> audioFiles) {
         this.name = name;
         this.audioFiles = audioFiles;
     }
@@ -26,7 +25,7 @@ public class Playlist {
         return name;
     }
 
-    public void setList(ObservableList<AudioFile> audioFiles) {
+    public void setList(SortedList<AudioFile> audioFiles) {
         this.audioFiles = audioFiles;
     }
 
@@ -50,10 +49,12 @@ public class Playlist {
         audioFiles.add(index, audioFile);
     }
 
-    public Playlist getShufflePlaylist() {
-        ObservableList<AudioFile> shuffleList = FXCollections.observableArrayList(audioFiles);
-        Collections.shuffle(shuffleList);
-        return new Playlist("Shuffle", shuffleList);
+    public ObservableList<AudioFile> getShuffleList() {
+        ObservableList<AudioFile> shuffleList = FXCollections.observableList(audioFiles);
+
+        FXCollections.shuffle(shuffleList);
+
+        return shuffleList;
     }
 
     @Override
