@@ -1,6 +1,5 @@
 package com.frank.jmusicplayerfx.util;
 
-import com.frank.jmusicplayerfx.gui.MainGUI;
 import javafx.fxml.FXMLLoader;
 
 import java.io.IOException;

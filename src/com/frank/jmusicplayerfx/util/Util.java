@@ -27,6 +27,7 @@ import javafx.util.Callback;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public final class Util {
@@ -58,11 +59,9 @@ public final class Util {
             public TableRow<AudioFile> call(TableView<AudioFile> param) {
                 TableRow<AudioFile> row = new TableRow<>();
 
-                row.itemProperty()
-                        .addListener((obs, old, newItem) -> styleRow(row));
+                row.itemProperty().addListener((obs, old, newItem) -> styleRow(row));
 
-                globalPlayer.currentAudioProperty()
-                        .addListener((obs, old, newAudio) -> styleRow(row));
+                globalPlayer.currentAudioProperty().addListener((obs, old, newAudio) -> styleRow(row));
 
                 row.setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2 && !row.isEmpty()) {
@@ -97,10 +96,7 @@ public final class Util {
             }
         });
 
-        SortedList<AudioFile> sortedList = new SortedList<>(playlist.getAudioFiles());
-        sortedList.comparatorProperty().bind(tableView.comparatorProperty());
-        tableView.setItems(sortedList);
-        tableView.sort();
+        tableView.setItems(playlist.getAudioFiles());
     }
 
     public static void initSlider(Slider slider, double defaultValue, String backgroundColor, String progressColor) {
