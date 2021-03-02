@@ -1,0 +1,11 @@
+.default_button {
+    -fx-background-color: white;
+}
+
+.default_button:hover {
+    -fx-background-color: #c8c8c8;
+}
+
+.default_button:pressed {
+    -fx-background-color: #999999;
+}
