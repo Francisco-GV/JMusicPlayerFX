@@ -16,14 +16,18 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.List;
 
 public class JMusicPlayerFX extends Application {
     private final String APP_TITLE = "JMusicPlayerFX";
+    private String APP_TITLE_DEBUG_TEXT;
 
     private Stage mainStage;
     private AudioLoader audioLoader;
     private GlobalPlayer globalPlayer;
     private MainGUI mainGUI;
+
+    private List<String> argDirectories;
 
     @Override
     public void init() {
@@ -33,6 +37,15 @@ public class JMusicPlayerFX extends Application {
 
     @Override
     public void start(Stage mainStage) {
+        List<String> args = getParameters().getRaw();
+
+        if (!args.isEmpty()) {
+            APP_TITLE_DEBUG_TEXT = args.get(0);
+            if (args.size() > 1) {
+                argDirectories = args.subList(1, args.size());
+            }
+        }
+
         this.mainStage = mainStage;
 
         final Image ICON24x24 = Util.getImage("/resources/images/music_24x24.png", 24, 24);
@@ -43,7 +56,7 @@ public class JMusicPlayerFX extends Application {
         scene.setFill(Color.rgb(33, 33, 33));
         mainStage.setScene(scene);
 
-        mainStage.setTitle(APP_TITLE);
+        mainStage.setTitle(APP_TITLE + " - " + APP_TITLE_DEBUG_TEXT);
         mainStage.setWidth(975);
         mainStage.setHeight(650);
         mainStage.centerOnScreen();
@@ -74,18 +87,26 @@ public class JMusicPlayerFX extends Application {
 
             mainStage.setScene(scene);
 
-            audioLoader.addNewDirectory(System.getProperty("user.home").concat("\\Music"));
-
-            audioLoader.loadAllMedia();
+            BackgroundTasker.executeInOtherThread(() -> {
+                try {
+                    Thread.sleep(2500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (argDirectories != null) {
+                    audioLoader.addNewDirectories(argDirectories);
+                }
+                audioLoader.loadAllMedia();
+            });
         });
     }
 
     public void setTitle(String text) {
-        mainStage.setTitle(text + "  |  " + APP_TITLE);
+        mainStage.setTitle(text + "  |  " + APP_TITLE + " - " + APP_TITLE_DEBUG_TEXT);
     }
 
     public void resetTitle() {
-        mainStage.setTitle(APP_TITLE);
+        mainStage.setTitle(APP_TITLE + " - " + APP_TITLE_DEBUG_TEXT);
     }
 
     public AudioLoader getAudioLoader() {
