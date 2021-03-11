@@ -15,23 +15,26 @@ import javafx.scene.image.Image;
 import javafx.util.Duration;
 
 public final class Data {
-    private final ObservableList<Artist> artists;
-    private final ObservableList<Album> albums;
+    private final ListProperty<Artist> artists;
+    private final ListProperty<Album> albums;
 
     public Data() {
-        artists = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
-        albums = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+        ObservableList<Artist> artists = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+        ObservableList<Album> albums = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+
+        this.artists = new ReadOnlyListWrapper<>(artists);
+        this.albums = new ReadOnlyListWrapper<>(albums);
     }
 
-    public ObservableList<Artist> getArtists() {
+    public ListProperty<Artist> getArtists() {
         return artists;
     }
 
-    public ObservableList<Album> getAlbums() {
+    public ListProperty<Album> getAlbums() {
         return albums;
     }
 
-    public Artist getOrReturnArtist(String artistName) {
+    public Artist getOrAddArtist(String artistName) {
         synchronized(artists) {
             Artist artistObject = artists.stream().filter(
                     artist -> artist.getName().equals(artistName))
@@ -39,11 +42,13 @@ public final class Data {
 
             if (artistObject != null) return artistObject;
 
-            return new Artist(artistName);
+            artistObject = new Artist(artistName);
+            artists.add(artistObject);
+            return artistObject;
         }
     }
 
-    public Album getOrReturnAlbum(String albumName, Artist albumArtist) {
+    public Album getOrAddAlbum(String albumName, Artist albumArtist) {
         synchronized (albums) {
             Album albumObject = albums.stream().filter(
                     album -> album.getName().equals(albumName)
@@ -52,7 +57,10 @@ public final class Data {
 
             if (albumObject != null) return albumObject;
 
-            return new Album(albumName, albumArtist);
+            albumObject = new Album(albumName, albumArtist);
+            albumArtist.addAlbum(albumObject);
+            albums.add(albumObject);
+            return albumObject;
         }
     }
 
@@ -68,28 +76,44 @@ public final class Data {
         }
     }
 
-    public static final class Artist {
+    public final class Artist {
         private final String name;
-        private final ObservableList<Album> albums;
+        private final ListProperty<Album> artistAlbums;
         private final ObjectProperty<Image> picture;
         private boolean collab;
 
         public Artist(String name) {
             this.name = name;
-            albums = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+
             picture = new SimpleObjectProperty<>();
+
+            ObservableList<Album> observableList = FXCollections.observableArrayList();
+            ObservableList<Album> synchronizedList = FXCollections.synchronizedObservableList(observableList);
+
+            artistAlbums = new ReadOnlyListWrapper<>(synchronizedList);
+
+            artistAlbums.sizeProperty().addListener((obs, oldValue, newValue) -> {
+                if (newValue.intValue() == 0 && oldValue.intValue() != 0) {
+                    artists.remove(this);
+                    System.out.println(this + " was deleted");
+                }
+            });
 
             setCollab(collabCharacterList.stream().anyMatch(name::contains));
         }
 
         public void addAlbum(Album album) {
-            if (!albums.contains(album)) {
-                albums.add(album);
+            if (!artistAlbums.contains(album)) {
+                artistAlbums.add(album);
             }
         }
 
-        public ObservableList<Album> getAlbums() {
-            return albums;
+        public void removeAlbum(Album album) {
+            artistAlbums.remove(album);
+        }
+
+        public ObservableList<Album> getArtistAlbums() {
+            return artistAlbums;
         }
 
         public ObjectProperty<Image> pictureProperty() {
@@ -128,17 +152,9 @@ public final class Data {
         public int hashCode() {
             return name.hashCode();
         }
-
-        public static final ObservableList<String> collabCharacterList;
-
-        static {
-            collabCharacterList = FXCollections.observableArrayList();
-
-            collabCharacterList.addAll("; ", "/", " - ");
-        }
     }
 
-    public static final class Album {
+    public final class Album {
         private final String name;
         private final Artist albumArtist;
         private final ListProperty<AudioFile> songs;
@@ -162,16 +178,25 @@ public final class Data {
 
             songs = new ReadOnlyListWrapper<>(synchronizedList);
 
+            songs.sizeProperty().addListener((obs, oldValue, newValue) -> {
+                if (newValue.intValue() == 0 && oldValue.intValue() != 0) {
+                    albums.remove(this);
+                    albumArtist.removeAlbum(this);
+                    System.out.println(this + " was deleted");
+                }
+            });
+
             songs.addListener((ListChangeListener<AudioFile>) change -> {
                 Duration durationChange = Duration.ZERO;
-
                 while (change.next()) {
                     for (AudioFile songAdded : change.getAddedSubList()) {
+                        songAdded.coverProperty().bind(this.coverProperty());
                         Duration duration = songAdded.getDuration();
                         durationChange = durationChange.add(duration);
                     }
 
                     for (AudioFile songDeleted : change.getRemoved()) {
+                        songDeleted.coverProperty().unbind();
                         Duration duration = songDeleted.getDuration();
                         durationChange = durationChange.subtract(duration);
                     }
@@ -184,7 +209,7 @@ public final class Data {
                 int size = songs.size();
 
                 if (songs.isEmpty()) {
-                    type.set(Type.EMPTY);
+                    changeType(Type.EMPTY);
                 } else if (size <= 3) {
                     if (totalDuration.get().lessThan(thirty)) {
 
@@ -194,18 +219,20 @@ public final class Data {
                                 moreTenMinutes = true;
                             }
                         }
-                        type.set(moreTenMinutes ? Type.EP : Type.SINGLE);
+                        changeType(moreTenMinutes ? Type.EP : Type.SINGLE);
                     }
                 } else if (size < 6 && duration.lessThanOrEqualTo(thirty)) {
-                    type.set(Type.EP);
+                    changeType(Type.EP);
                 } else if (size >= 6) {
-                    type.set(Type.ALBUM);
+                    changeType(Type.ALBUM);
                 }
             });
         }
 
-        public enum Type {
-            EMPTY, SINGLE, EP, ALBUM
+        private void changeType(Type type) {
+            if (typeProperty().get() != type) {
+                typeProperty().set(type);
+            }
         }
 
         public ListProperty<AudioFile> songsListProperty() {
@@ -257,5 +284,17 @@ public final class Data {
         public String toString() {
             return "[Album]: " + name + " by " + albumArtist.getName();
         }
+    }
+
+    public static final ObservableList<String> collabCharacterList;
+
+    static {
+        collabCharacterList = FXCollections.observableArrayList();
+
+        collabCharacterList.addAll("; ", "/", " - ");
+    }
+
+    public enum Type {
+        EMPTY, SINGLE, EP, ALBUM
     }
 }
