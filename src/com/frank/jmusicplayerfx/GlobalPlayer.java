@@ -21,7 +21,7 @@ public final class GlobalPlayer {
     private final DoubleProperty volume;
     private final BooleanProperty mute;
     private final BooleanProperty shuffle;
-    private Playlist currentPlaylist;
+    private final ObjectProperty<Playlist> currentPlaylist;
     // temporalPlaylist is use to save the ordered playlist when shuffle is used
     private int currentIndex;
 
@@ -38,6 +38,7 @@ public final class GlobalPlayer {
         mute = new SimpleBooleanProperty(false);
         repeat = new SimpleObjectProperty<>(Repeat.DISABLE);
         shuffle = new SimpleBooleanProperty(false);
+        currentPlaylist = new SimpleObjectProperty<>();
 
         mediaPlayer.addListener((obs, oldPlayer, newPlayer) -> {
             if (oldPlayer != null) {
@@ -68,7 +69,11 @@ public final class GlobalPlayer {
         });
 
         shuffle.addListener((obs, old, shuffle) -> {
+            if (shuffle) {
+                if (getCurrentPlaylist() != null) {
 
+                }
+            }
         });
     }
 
@@ -82,7 +87,7 @@ public final class GlobalPlayer {
         mediaPlayer.setOnReady(() -> {
             int index = 0;
 
-            if (currentPlaylist != playlist) {
+            if (currentPlaylist.get() != playlist) {
                 setCurrentPlaylist(playlist);
             }
             if (playlist != null) {
@@ -152,7 +157,7 @@ public final class GlobalPlayer {
     }
 
     public void setCurrentPlaylist(Playlist playlist) {
-        currentPlaylist = playlist;
+        currentPlaylist.set(playlist);
     }
 
     public void setCurrentIndex(int currentIndex) {
@@ -188,6 +193,6 @@ public final class GlobalPlayer {
     }
 
     public Playlist getCurrentPlaylist() {
-        return currentPlaylist;
+        return currentPlaylist.get();
     }
 }

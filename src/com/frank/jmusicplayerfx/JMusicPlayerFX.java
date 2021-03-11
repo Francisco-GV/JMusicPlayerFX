@@ -121,6 +121,10 @@ public class JMusicPlayerFX extends Application {
         return mainGUI;
     }
 
+    public Stage getMainStage() {
+        return mainStage;
+    }
+
     public static void main(String[] args) {
         Application.launch(args);
     }
