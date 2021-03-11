@@ -1,4 +1,4 @@
-package com.frank.jmusicplayerfx.gui;
+package com.frank.jmusicplayerfx.gui.container;
 
 import com.frank.jmusicplayerfx.JMusicPlayerFX;
 import com.frank.jmusicplayerfx.gui.element.album.AlbumElement;
@@ -8,37 +8,65 @@ import com.frank.jmusicplayerfx.Data.Album;
 import com.frank.jmusicplayerfx.util.BackgroundTasker;
 import com.frank.jmusicplayerfx.util.Loader;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ListProperty;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class PaneAlbums extends FlowPane {
-    private final ObservableList<Album> albumsList;
+public class PaneAlbums extends VBox {
+    private final ListProperty<Album> albumsList;
 
+    private final ScrollPane scrollPane;
+    private final FlowPane albumElementContainer;
     private final NoFoundPane noFoundPane;
 
     public PaneAlbums() {
+        scrollPane = new ScrollPane();
         noFoundPane = new NoFoundPane("albums");
+        albumElementContainer = new FlowPane(Orientation.HORIZONTAL);
+
         albumsList = JMusicPlayerFX.getInstance().getAudioLoader().getInfo().getAlbums();
         initPaneArtists();
     }
 
     private void initPaneArtists() {
+        scrollPane.getStylesheets().add("/resources/css/main_gui_style.css");
+        scrollPane.setId("scroll_pane_content");
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+        albumElementContainer.setColumnHalignment(HPos.CENTER);
+        albumElementContainer.setRowValignment(VPos.CENTER);
+        albumElementContainer.setHgap(15);
+        albumElementContainer.setVgap(15);
+        albumElementContainer.setAlignment(Pos.TOP_CENTER);
+
+        scrollPane.setContent(albumElementContainer);
+
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+        VBox.setMargin(noFoundPane, new Insets(25, 0, 0, 0));
+
         this.setPadding(new Insets(15));
-        this.setHgap(15);
-        this.setVgap(15);
-        this.setColumnHalignment(HPos.CENTER);
-        this.setRowValignment(VPos.TOP);
-        this.setAlignment(Pos.TOP_CENTER);
+        this.setAlignment(Pos.CENTER);
+        this.getChildren().addAll(noFoundPane, scrollPane);
+
+        noFoundPane.visibleProperty().bind(Bindings.createBooleanBinding(() ->
+                (albumsList.size() == 0), albumsList.sizeProperty()));
+        noFoundPane.managedProperty().bind(noFoundPane.visibleProperty());
 
         addAlbums();
         albumsList.addListener(this::updateAlbumsEvent);
@@ -60,15 +88,9 @@ public class PaneAlbums extends FlowPane {
                     .filter(element -> removedAlbums.contains(element.getAlbum()))
                     .collect(Collectors.toList());
 
-            this.getChildren().removeAll(toRemove);
-
-            if (change.getList().isEmpty()) {
-                getChildren().setAll(noFoundPane);
-            } else {
-                getChildren().remove(noFoundPane);
-            }
-            sortAlbums();
+            albumElementContainer.getChildren().removeAll(toRemove);
         }
+        sortAlbums();
     }
 
     private void addAlbumElement(AlbumElement albumElement) {
@@ -84,18 +106,20 @@ public class PaneAlbums extends FlowPane {
                     e.printStackTrace();
                 }
                 albumElement.setAlbumView(albumView);
+
+                Platform.runLater(() -> {
+                    if (!albumElementContainer.getChildren().contains(albumElement)) {
+                        albumElementContainer.getChildren().add(albumElement);
+                    }
+                });
             });
-            if (!getChildren().contains(albumElement)) getChildren().add(albumElement);
         });
     }
 
     private void addAlbums() {
-        this.getChildren().clear();
+        albumElementContainer.getChildren().clear();
 
-        if (albumsList.isEmpty()) {
-            this.getChildren().setAll(noFoundPane);
-        } else {
-            this.getChildren().remove(noFoundPane);
+        if (!albumsList.isEmpty()) {
             albumsList.forEach(album -> {
                 AlbumElement albumElement = new AlbumElement(album);
                 addAlbumElement(albumElement);
@@ -117,13 +141,13 @@ public class PaneAlbums extends FlowPane {
                     return lblo1.getText().compareTo(lblo2.getText());
                 } else return 0;
             });
-            this.getChildren().setAll(albumsElements);
+            albumElementContainer.getChildren().setAll(albumsElements);
         });
     }
 
     private List<AlbumElement> getAlbumsElements() {
-        synchronized (this.getChildrenUnmodifiable()) {
-            return this.getChildrenUnmodifiable().stream()
+        synchronized (albumElementContainer.getChildrenUnmodifiable()) {
+            return albumElementContainer.getChildrenUnmodifiable().stream()
                     .filter(node -> node instanceof AlbumElement)
                     .map(node -> (AlbumElement) node)
                     .collect(Collectors.toList());

@@ -1,20 +1,27 @@
-package com.frank.jmusicplayerfx.gui;
+package com.frank.jmusicplayerfx.gui.container;
 
 import com.frank.jmusicplayerfx.AudioLoader;
+import com.frank.jmusicplayerfx.Data.Album;
+import com.frank.jmusicplayerfx.Data.Artist;
 import com.frank.jmusicplayerfx.JMusicPlayerFX;
 import com.frank.jmusicplayerfx.gui.element.extra.NoFoundPane;
 import com.frank.jmusicplayerfx.media.AudioFile;
 import com.frank.jmusicplayerfx.media.Playlist;
 import com.frank.jmusicplayerfx.util.Util;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.util.Duration;
 
 import java.util.Comparator;
 import java.util.List;
+
+import static com.frank.jmusicplayerfx.util.Util.formatTime;
 
 public class PaneSongs {
     @FXML private TableView<AudioFile> musicTable;
@@ -29,9 +36,18 @@ public class PaneSongs {
         AudioLoader audioLoader = JMusicPlayerFX.getInstance().getAudioLoader();
 
         titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
-        artistColumn.setCellValueFactory(cellData -> cellData.getValue().artistProperty());
-        albumColumn.setCellValueFactory(cellData -> cellData.getValue().albumProperty());
-        durationColumn.setCellValueFactory(cellData -> cellData.getValue().durationFormattedProperty());
+        artistColumn.setCellValueFactory(cellData -> {
+            ObjectProperty<Artist> artist = cellData.getValue().artistProperty();
+            return Bindings.createStringBinding(() -> artist.get().getName(), artist);
+        });
+        albumColumn.setCellValueFactory(cellData -> {
+            ObjectProperty<Album> album = cellData.getValue().albumProperty();
+            return Bindings.createStringBinding(() -> album.get().getName(), album);
+        });
+        durationColumn.setCellValueFactory(param -> {
+            ObjectProperty<Duration> duration = param.getValue().durationProperty();
+            return Bindings.createStringBinding(() -> formatTime(duration.get()), duration);
+        });
 
         musicTable.getColumns().forEach(col -> col.setStyle("-fx-alignment: center-left;"));
         titleColumn.setStyle(titleColumn.getStyle() + "-fx-padding: 0 0 0 15px;");

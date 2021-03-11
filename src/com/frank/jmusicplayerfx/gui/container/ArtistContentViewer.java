@@ -1,5 +1,6 @@
-package com.frank.jmusicplayerfx.gui;
+package com.frank.jmusicplayerfx.gui.container;
 
+import com.frank.jmusicplayerfx.Data;
 import com.frank.jmusicplayerfx.Data.Album;
 import com.frank.jmusicplayerfx.Data.Artist;
 import com.frank.jmusicplayerfx.gui.element.album.AlbumElement;
@@ -74,7 +75,7 @@ public class ArtistContentViewer {
         lblArtistName.setText(artist.getName());
         setPictureListener();
         addAlbums();
-        artist.getAlbums().addListener(this::updateArtistContentEvent);
+        artist.getArtistAlbums().addListener(this::updateArtistContentEvent);
     }
 
     private void updateArtistContentEvent(ListChangeListener.Change<? extends Album> change) {
@@ -154,7 +155,7 @@ public class ArtistContentViewer {
     }
 
     private void addAlbumElement(AlbumElement albumElement) {
-        ObjectProperty<Album.Type> type = albumElement.getAlbum().typeProperty();
+        ObjectProperty<Data.Type> type = albumElement.getAlbum().typeProperty();
 
         type.addListener((obs, old, newType) -> {
             removeAlbumElementForAll(albumElement);
@@ -198,10 +199,12 @@ public class ArtistContentViewer {
     private void addAlbums() {
         albumsPane.getChildren().clear();
 
-        artist.getAlbums().forEach(album -> {
-            AlbumElement albumElement = new AlbumElement(album);
-            addAlbumElement(albumElement);
-        });
+        synchronized (artist.getArtistAlbums()) {
+            artist.getArtistAlbums().forEach(album -> {
+                AlbumElement albumElement = new AlbumElement(album);
+                addAlbumElement(albumElement);
+            });
+        }
     }
 
     @FXML private void backDefaultPane() {
@@ -226,21 +229,21 @@ public class ArtistContentViewer {
     }
 
     private List<AlbumElement> getAlbumElements() {
-        return albumContainer.getChildren().stream()
+        return albumContainer.getChildrenUnmodifiable().stream()
                 .filter(node -> node instanceof AlbumElement)
                 .map(node -> (AlbumElement) node)
                 .collect(Collectors.toList());
     }
 
     private List<AlbumElement> getEPElements() {
-        return epContainer.getChildren().stream()
+        return epContainer.getChildrenUnmodifiable().stream()
                 .filter(node -> node instanceof AlbumElement)
                 .map(node -> (AlbumElement) node)
                 .collect(Collectors.toList());
     }
 
     private List<AlbumElement> getSingleElements() {
-        return singleContainer.getChildren().stream()
+        return singleContainer.getChildrenUnmodifiable().stream()
                 .filter(node -> node instanceof AlbumElement)
                 .map(node -> (AlbumElement) node)
                 .collect(Collectors.toList());

@@ -1,5 +1,6 @@
-package com.frank.jmusicplayerfx.gui;
+package com.frank.jmusicplayerfx.gui.container;
 
+import com.frank.jmusicplayerfx.gui.MainGUI;
 import com.frank.jmusicplayerfx.gui.element.album.AlbumView;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -48,7 +49,7 @@ public class AlbumContentViewer extends VBox {
         btnExit.setMinSize(btnSize, btnSize);
         btnExit.setOnAction(e -> {
             mainGUI.getCenterStackPane().getChildren().remove(this);
-            mainGUI.blurDefaultPane(false);
+            mainGUI.blurDefaultPane(false, null);
         });
 
         topBox.setMaxWidth(720);
