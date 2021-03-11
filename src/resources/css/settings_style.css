@@ -2,8 +2,30 @@
     -fx-background-color : rgba(0, 0, 0, 0.4);
 }
 
+.background {
+    -fx-background-color : #222222;
+}
+
 #settings_root {
     -fx-background-color : #222222;
+}
+
+.list-view {
+    -fx-background-color: transparent;
+}
+
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill : white;
+    -fx-font-size: 13px;
+}
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
 }
 
 .label {

@@ -1,11 +1,41 @@
+.straight {
+    -fx-border-radius     : 0;
+    -fx-background-radius : 0;
+}
+
 .default_button {
-    -fx-background-color: white;
+    -fx-background-color : white;
 }
 
 .default_button:hover {
-    -fx-background-color: #c8c8c8;
+    -fx-background-color : #c8c8c8;
 }
 
 .default_button:pressed {
-    -fx-background-color: #999999;
+    -fx-background-color : #999999;
+}
+
+.dark_button {
+    -fx-background-color : #161616;
+    -fx-text-fill        : white;
+}
+
+.dark_button:hover {
+    -fx-background-color : #202020;
+}
+
+.dark_button:pressed {
+    -fx-background-color : #242424;
+}
+
+.red_button {
+    -fx-background-color : #ba3535;
+}
+
+.red_button:hover {
+    -fx-background-color : #812727;
+}
+
+.red_button:pressed {
+    -fx-background-color : #672424;
 }

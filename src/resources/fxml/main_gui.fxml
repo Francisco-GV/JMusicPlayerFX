@@ -13,74 +13,92 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-
-<StackPane fx:id="root" minHeight="480.0" minWidth="600.0" prefHeight="650.0" prefWidth="950.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frank.jmusicplayerfx.gui.MainGUI">
-    <BorderPane id="main_root" fx:id="guiRoot" style="-fx-background-color: #212121;" stylesheets="@../css/main_gui_style.css">
+<StackPane fx:id="root" minHeight="480.0" minWidth="600.0" prefHeight="650.0" prefWidth="950.0"
+           style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/15.0.1"
+           xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.frank.jmusicplayerfx.gui.MainGUI">
+    <BorderPane id="main_root" fx:id="guiRoot" style="-fx-background-color: #212121;"
+                stylesheets="@../css/main_gui_style.css">
         <left>
             <VBox id="left_menu_box" fx:id="leftMenu" alignment="TOP_CENTER" BorderPane.alignment="CENTER">
                 <Button id="btn_hide_menu_box" mnemonicParsing="false" onAction="#minimizeLeftMenu">
                     <graphic>
-                        <Label fx:id="graphicBtnHideMenu" text="Label" />
+                        <Label fx:id="graphicBtnHideMenu" text="Label"/>
                     </graphic>
                 </Button>
-                <VBox id="left_menu_sections" fx:id="leftMenuSections" alignment="TOP_CENTER" prefWidth="100.0" stylesheets="@../css/custom_button_style.css">
-                    <HBox id="btn_songs" alignment="CENTER_LEFT" onKeyReleased="#openSection" onMouseReleased="#openSection" styleClass="custom_section_button" VBox.vgrow="NEVER">
-                        <Label id="songs_icon" contentDisplay="GRAPHIC_ONLY" styleClass="lbl_icon" text="Icon" HBox.hgrow="NEVER">
+                <VBox id="left_menu_sections" fx:id="leftMenuSections" alignment="TOP_CENTER" prefWidth="100.0"
+                      stylesheets="@../css/custom_button_style.css">
+                    <HBox id="btn_songs" alignment="CENTER_LEFT" onKeyReleased="#openSection"
+                          onMouseReleased="#openSection" styleClass="custom_section_button" VBox.vgrow="NEVER">
+                        <Label id="songs_icon" contentDisplay="GRAPHIC_ONLY" styleClass="lbl_icon" text="Icon"
+                               HBox.hgrow="NEVER">
                             <HBox.margin>
-                                <Insets />
+                                <Insets/>
                             </HBox.margin>
                         </Label>
-                        <Label alignment="CENTER" contentDisplay="CENTER" styleClass="lbl_title" text="Songs" HBox.hgrow="ALWAYS">
+                        <Label alignment="CENTER" contentDisplay="CENTER" styleClass="lbl_title" text="Songs"
+                               HBox.hgrow="ALWAYS">
                             <HBox.margin>
-                                <Insets />
-                            </HBox.margin>
-                        </Label>
-                    </HBox>
-                    <HBox id="btn_artists" alignment="CENTER_LEFT" onKeyReleased="#openSection" onMouseReleased="#openSection" styleClass="custom_section_button" VBox.vgrow="NEVER">
-                        <Label id="artists_icon" contentDisplay="GRAPHIC_ONLY" styleClass="lbl_icon" text="Icon" HBox.hgrow="NEVER">
-                            <HBox.margin>
-                                <Insets />
-                            </HBox.margin>
-                        </Label>
-                        <Label alignment="CENTER" contentDisplay="CENTER" styleClass="lbl_title" text="Artists" HBox.hgrow="ALWAYS">
-                            <HBox.margin>
-                                <Insets />
+                                <Insets/>
                             </HBox.margin>
                         </Label>
                     </HBox>
-                    <HBox id="btn_albums" alignment="CENTER_LEFT" onKeyReleased="#openSection" onMouseReleased="#openSection" styleClass="custom_section_button" VBox.vgrow="NEVER">
-                        <Label id="albums_icon" contentDisplay="GRAPHIC_ONLY" styleClass="lbl_icon" text="Icon" HBox.hgrow="NEVER">
+                    <HBox id="btn_artists" alignment="CENTER_LEFT" onKeyReleased="#openSection"
+                          onMouseReleased="#openSection" styleClass="custom_section_button" VBox.vgrow="NEVER">
+                        <Label id="artists_icon" contentDisplay="GRAPHIC_ONLY" styleClass="lbl_icon" text="Icon"
+                               HBox.hgrow="NEVER">
                             <HBox.margin>
-                                <Insets />
+                                <Insets/>
                             </HBox.margin>
                         </Label>
-                        <Label alignment="CENTER" contentDisplay="CENTER" styleClass="lbl_title" text="Albums" HBox.hgrow="ALWAYS">
+                        <Label alignment="CENTER" contentDisplay="CENTER" styleClass="lbl_title" text="Artists"
+                               HBox.hgrow="ALWAYS">
                             <HBox.margin>
-                                <Insets />
-                            </HBox.margin>
-                        </Label>
-                    </HBox>
-                    <HBox id="btn_playlists" alignment="CENTER_LEFT" onKeyReleased="#openSection" onMouseReleased="#openSection" styleClass="custom_section_button" VBox.vgrow="NEVER">
-                        <Label id="playlists_icon" contentDisplay="GRAPHIC_ONLY" styleClass="lbl_icon" text="Icon" HBox.hgrow="NEVER">
-                            <HBox.margin>
-                                <Insets />
-                            </HBox.margin>
-                        </Label>
-                        <Label alignment="CENTER" contentDisplay="CENTER" styleClass="lbl_title" text="Playlists" HBox.hgrow="ALWAYS">
-                            <HBox.margin>
-                                <Insets />
+                                <Insets/>
                             </HBox.margin>
                         </Label>
                     </HBox>
-                    <HBox id="btn_favorites" alignment="CENTER_LEFT" onKeyReleased="#openSection" onMouseReleased="#openSection" styleClass="custom_section_button" VBox.vgrow="NEVER">
-                        <Label id="favorites_icon" contentDisplay="GRAPHIC_ONLY" styleClass="lbl_icon" text="Icon" HBox.hgrow="NEVER">
+                    <HBox id="btn_albums" alignment="CENTER_LEFT" onKeyReleased="#openSection"
+                          onMouseReleased="#openSection" styleClass="custom_section_button" VBox.vgrow="NEVER">
+                        <Label id="albums_icon" contentDisplay="GRAPHIC_ONLY" styleClass="lbl_icon" text="Icon"
+                               HBox.hgrow="NEVER">
                             <HBox.margin>
-                                <Insets />
+                                <Insets/>
                             </HBox.margin>
                         </Label>
-                        <Label alignment="CENTER" contentDisplay="CENTER" styleClass="lbl_title" text="Favorites" HBox.hgrow="ALWAYS">
+                        <Label alignment="CENTER" contentDisplay="CENTER" styleClass="lbl_title" text="Albums"
+                               HBox.hgrow="ALWAYS">
                             <HBox.margin>
-                                <Insets />
+                                <Insets/>
+                            </HBox.margin>
+                        </Label>
+                    </HBox>
+                    <HBox id="btn_playlists" alignment="CENTER_LEFT" onKeyReleased="#openSection"
+                          onMouseReleased="#openSection" styleClass="custom_section_button" VBox.vgrow="NEVER">
+                        <Label id="playlists_icon" contentDisplay="GRAPHIC_ONLY" styleClass="lbl_icon" text="Icon"
+                               HBox.hgrow="NEVER">
+                            <HBox.margin>
+                                <Insets/>
+                            </HBox.margin>
+                        </Label>
+                        <Label alignment="CENTER" contentDisplay="CENTER" styleClass="lbl_title" text="Playlists"
+                               HBox.hgrow="ALWAYS">
+                            <HBox.margin>
+                                <Insets/>
+                            </HBox.margin>
+                        </Label>
+                    </HBox>
+                    <HBox id="btn_favorites" alignment="CENTER_LEFT" onKeyReleased="#openSection"
+                          onMouseReleased="#openSection" styleClass="custom_section_button" VBox.vgrow="NEVER">
+                        <Label id="favorites_icon" contentDisplay="GRAPHIC_ONLY" styleClass="lbl_icon" text="Icon"
+                               HBox.hgrow="NEVER">
+                            <HBox.margin>
+                                <Insets/>
+                            </HBox.margin>
+                        </Label>
+                        <Label alignment="CENTER" contentDisplay="CENTER" styleClass="lbl_title" text="Favorites"
+                               HBox.hgrow="ALWAYS">
+                            <HBox.margin>
+                                <Insets/>
                             </HBox.margin>
                         </Label>
                     </HBox>
@@ -89,43 +107,51 @@
         </left>
         <bottom>
             <AnchorPane BorderPane.alignment="CENTER">
-                <fx:include source="bottom_player.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" BorderPane.alignment="CENTER" />
+                <fx:include source="bottom_player.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                            AnchorPane.rightAnchor="0.0" BorderPane.alignment="CENTER"/>
             </AnchorPane>
         </bottom>
         <center>
             <StackPane fx:id="centerStackPane" BorderPane.alignment="CENTER">
-                <VBox fx:id="centerDefaultPane" prefHeight="200.0" prefWidth="450.0" spacing="15.0">
+                <VBox prefHeight="200.0" prefWidth="450.0" spacing="15.0">
                     <padding>
-                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
                     </padding>
-                    <Label id="pane_content_title" fx:id="lblTitleContent" maxWidth="1.7976931348623157E308" text="Title" VBox.vgrow="NEVER" />
-                    <ScrollPane id="scroll_pane_content" fx:id="scrollPaneContainer" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS" />
+                    <Label id="pane_content_title" fx:id="lblTitleContent" maxWidth="1.7976931348623157E308"
+                           text="Title" VBox.vgrow="NEVER"/>
+                    <ScrollPane id="scroll_pane_content" fx:id="scrollPaneContainer" fitToHeight="true"
+                                fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS"/>
                 </VBox>
             </StackPane>
         </center>
         <top>
             <GridPane id="top_box" alignment="TOP_CENTER" BorderPane.alignment="CENTER">
                 <columnConstraints>
-                    <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" />
-                    <ColumnConstraints halignment="RIGHT" hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="50.0" />
+                    <ColumnConstraints halignment="LEFT" hgrow="ALWAYS"/>
+                    <ColumnConstraints halignment="RIGHT" hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity"
+                                       prefWidth="50.0"/>
                 </columnConstraints>
                 <rowConstraints>
-                    <RowConstraints valignment="TOP" vgrow="NEVER" />
+                    <RowConstraints valignment="TOP" vgrow="NEVER"/>
                 </rowConstraints>
-                <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" prefWidth="600.0" spacing="10.0" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP" GridPane.vgrow="NEVER">
+                <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" prefWidth="600.0" spacing="10.0"
+                      GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.valignment="TOP"
+                      GridPane.vgrow="NEVER">
                     <padding>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                     </padding>
-                    <Label id="lbl_app_icon" alignment="CENTER" />
-                    <Label id="lbl_app_title" text="JMusicPlayerFX" />
-                    <Label id="lbl_author" text="By:" />
+                    <Label id="lbl_app_icon" alignment="CENTER"/>
+                    <Label id="lbl_app_title" text="JMusicPlayerFX"/>
+                    <Label id="lbl_author" text="By:"/>
                     <Hyperlink onAction="#openAuthorLink" text="\@FrankGV42">
                         <HBox.margin>
-                            <Insets left="-10.0" />
+                            <Insets left="-10.0"/>
                         </HBox.margin>
                     </Hyperlink>
                 </HBox>
-                <Button id="btn_config" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#openSettings" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
+                <Button id="btn_config" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false"
+                        onAction="#openSettings" GridPane.columnIndex="1" GridPane.halignment="CENTER"
+                        GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER"/>
             </GridPane>
         </top>
     </BorderPane>
