@@ -1,6 +1,7 @@
 package com.frank.jmusicplayerfx.gui.element.artist;
 
 import com.frank.jmusicplayerfx.Data.Artist;
+import com.frank.jmusicplayerfx.util.Util;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
@@ -26,6 +27,8 @@ public class ArtistElement extends VBox {
     private final Label lblPicture;
     private final Label lblName;
 
+    private LinearGradient gradient;
+
     private final BooleanProperty defaultPicture;
 
     public ArtistElement(Artist artist) {
@@ -50,6 +53,8 @@ public class ArtistElement extends VBox {
             }
         });
 
+        setGradient(Util.randomGradient());
+
         initializeElement();
     }
 
@@ -70,6 +75,8 @@ public class ArtistElement extends VBox {
     }
 
     public void setGradient(LinearGradient gradient) {
+        this.gradient = gradient;
+
         BorderStroke borderStroke = new BorderStroke(gradient, BorderStrokeStyle.SOLID,
                 new CornerRadii(50, true), new BorderWidths(2));
         pictureContainer.setBorder(new Border(borderStroke));
@@ -82,6 +89,10 @@ public class ArtistElement extends VBox {
 
     public Artist getArtist() {
         return artist;
+    }
+
+    public LinearGradient getGradient() {
+        return gradient;
     }
 
     @Override

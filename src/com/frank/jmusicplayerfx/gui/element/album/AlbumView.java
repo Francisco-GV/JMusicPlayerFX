@@ -7,6 +7,7 @@ import com.frank.jmusicplayerfx.util.BackgroundTasker;
 import com.frank.jmusicplayerfx.util.ImageScaler;
 import com.frank.jmusicplayerfx.util.Util;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.concurrent.Task;
@@ -28,8 +29,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
-import java.util.Comparator;
+import static com.frank.jmusicplayerfx.util.Util.formatTime;
 
 @SuppressWarnings("unused")
 public class AlbumView {
@@ -63,12 +65,16 @@ public class AlbumView {
         lblArtistName.setText(album.getAlbumArtist().getName());
         lblYear.textProperty().bind(album.yearProperty().asString());
         lblNSongs.textProperty().bind(album.songsListProperty().sizeProperty().asString("%d songs"));
-        lblDuration.textProperty().bind(Bindings.createStringBinding(() -> Util.formatTime(album.totalDurationProperty().get()) + " minutes",
+        lblDuration.textProperty().bind(Bindings.createStringBinding(() ->
+                        Util.formatTime(album.totalDurationProperty().get()) + " minutes",
                 album.totalDurationProperty()));
 
         numberColumn.setCellValueFactory(cellData -> cellData.getValue().trackNumberProperty().asString("%d.-"));
         titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
-        durationColumn.setCellValueFactory(cellData -> cellData.getValue().durationFormattedProperty());
+        durationColumn.setCellValueFactory(cellData -> {
+            ObjectProperty<Duration> duration = cellData.getValue().durationProperty();
+            return Bindings.createStringBinding(() -> formatTime(duration.get()), duration);
+        });
 
         numberColumn.setStyle("-fx-alignment: center-right");
         titleColumn.setStyle("-fx-alignment: center-left");
