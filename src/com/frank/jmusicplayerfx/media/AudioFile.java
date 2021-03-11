@@ -1,12 +1,13 @@
 package com.frank.jmusicplayerfx.media;
 
 import com.frank.jmusicplayerfx.Data;
+import com.frank.jmusicplayerfx.Data.Album;
+import com.frank.jmusicplayerfx.Data.Artist;
 import com.frank.jmusicplayerfx.JMusicPlayerFX;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
@@ -19,20 +20,15 @@ import javafx.util.Duration;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import static com.frank.jmusicplayerfx.Data.Album;
-import static com.frank.jmusicplayerfx.Data.Artist;
-import static com.frank.jmusicplayerfx.util.Util.formatTime;
-
-@SuppressWarnings("unused")
 public class AudioFile {
     private final StringProperty title;
-    private final StringProperty artist;
-    private final StringProperty album;
-    private final StringProperty albumArtist;
+    private final ObjectProperty<Artist> artist;
+    private final ObjectProperty<Artist> albumArtist;
+    private final ObjectProperty<Album> album;
     private final StringProperty genre;
-    private final StringProperty durationFormatted;
     private final IntegerProperty year;
     private final IntegerProperty trackNumber;
     private final ObjectProperty<Duration> duration;
@@ -41,21 +37,26 @@ public class AudioFile {
     private Media media;
     private final File file;
 
-    public AudioFile(File file) {
+    public AudioFile(File file) throws FileNotFoundException {
+        if (file == null || !file.exists())
+            throw new FileNotFoundException(file + " null or doesn't exists.");
+
         this.file = file;
 
-        title = new ReadOnlyStringWrapper(UNKNOWN_TITLE);
-        artist = new ReadOnlyStringWrapper(UNKNOWN_ARTIST);
-        albumArtist = new ReadOnlyStringWrapper(UNKNOWN_ARTIST);
-        album = new ReadOnlyStringWrapper(UNKNOWN_ALBUM);
-        genre = new ReadOnlyStringWrapper(UNKNOWN_GENRE);
-        year = new ReadOnlyIntegerWrapper(0);
+        title       = new ReadOnlyStringWrapper(UNKNOWN_TITLE);
+        artist      = new ReadOnlyObjectWrapper<>(null);
+        albumArtist = new ReadOnlyObjectWrapper<>(null);
+        album       = new ReadOnlyObjectWrapper<>(null);
+        genre       = new ReadOnlyStringWrapper(UNKNOWN_GENRE);
+        year        = new ReadOnlyIntegerWrapper(0);
         trackNumber = new ReadOnlyIntegerWrapper(1);
-        duration = new ReadOnlyObjectWrapper<>(Duration.ZERO);
-        durationFormatted = new ReadOnlyStringWrapper("00:00");
-        cover = new ReadOnlyObjectWrapper<>(null);
-        durationFormatted.bind(Bindings.createStringBinding(() -> formatTime(duration.get()), durationProperty()));
+        duration    = new ReadOnlyObjectWrapper<>(Duration.ZERO);
+        cover       = new ReadOnlyObjectWrapper<>(null);
 
+        loadMetadata();
+    }
+
+    private void loadMetadata() {
         ID3v2 id3v2 = null;
         try {
             Mp3File mp3File = new Mp3File(file);
@@ -74,32 +75,15 @@ public class AudioFile {
         if (id3v2 != null) {
             title.set(id3v2.getTitle() != null && !id3v2.getTitle().isBlank()
                     ? id3v2.getTitle() : UNKNOWN_TITLE);
-            artist.set(id3v2.getArtist() != null && !id3v2.getArtist().isBlank()
-                    ? id3v2.getArtist().trim() : UNKNOWN_ARTIST);
-            albumArtist.set(id3v2.getAlbumArtist() != null && !id3v2.getAlbumArtist().isBlank()
-                    ? id3v2.getAlbumArtist().trim() : UNKNOWN_ARTIST);
-            album.set(id3v2.getAlbum() != null && !id3v2.getAlbum().isBlank()
-                    ? id3v2.getAlbum().trim() : UNKNOWN_ALBUM);
+
             genre.set(id3v2.getGenreDescription() != null && !id3v2.getGenreDescription().isBlank()
                     ? id3v2.getGenreDescription() : UNKNOWN_GENRE);
-            year.set(id3v2.getYear() != null
-                    ? Integer.parseInt(id3v2.getYear()) : 0);
-            trackNumber.set(id3v2.getTrack() != null
-                    ? Integer.parseInt(id3v2.getTrack()) : 1);
-        }
 
-        createArtistAndAlbum();
+            year.set(id3v2.getYear() != null ? Integer.parseInt(id3v2.getYear()) : 0);
 
-        if (id3v2 != null) {
-            Data data = JMusicPlayerFX.getInstance().getAudioLoader().getInfo();
+            trackNumber.set(id3v2.getTrack() != null ? Integer.parseInt(id3v2.getTrack()) : 1);
 
-            Artist albumArtist = data.getOrReturnArtist(getAlbumArtist());
-            Album album = data.getOrReturnAlbum(getAlbum(), albumArtist);
-
-            if (album.coverProperty().get() == null) {
-                loadCover(id3v2);
-                album.coverProperty().set(getCover());
-            }
+            createDataObjects(id3v2);
         }
     }
 
@@ -111,126 +95,88 @@ public class AudioFile {
         }
     }
 
-    private void createArtistAndAlbum() {
+    private void createDataObjects(ID3v2 id3v2) {
         Data data = JMusicPlayerFX.getInstance().getAudioLoader().getInfo();
 
-        Artist artist = data.getOrReturnArtist(getArtist());
-        Artist albumArtist = data.getOrReturnArtist(getAlbumArtist());
+        String id3v2Artist = id3v2.getArtist();
+        String artistName = id3v2Artist == null || id3v2Artist.isBlank()
+                ? UNKNOWN_ARTIST : id3v2Artist.trim();
 
-        if (getAlbumArtist().equals(UNKNOWN_ARTIST)) {
-            String artistName = getArtist().split(";")[0];
-            albumArtist = data.getOrReturnArtist(artistName);
+        String id3v2Album = id3v2.getAlbum();
+        String albumName = id3v2Album == null || id3v2Album.isBlank()
+                ? UNKNOWN_ALBUM : id3v2Album.trim();
+
+        String id3v2AlbumArtist = id3v2.getAlbumArtist();
+        String albumArtistName = id3v2AlbumArtist == null || id3v2AlbumArtist.isBlank()
+                ? UNKNOWN_ARTIST : id3v2AlbumArtist.trim();
+
+
+        Artist artist = data.getOrAddArtist(artistName);
+        if (albumArtistName.equals(UNKNOWN_ARTIST)) {
+            albumArtistName = artistName.split(";")[0];
+        }
+        Artist albumArtist = data.getOrAddArtist(albumArtistName);
+        Album album = data.getOrAddAlbum(albumName, albumArtist);
+
+        artistProperty().set(artist);
+        albumArtistProperty().set(albumArtist);
+        albumProperty().set(album);
+
+        if (!albumName.equals(UNKNOWN_ALBUM)) {
+            if (album.yearProperty().get() == 0) {
+                int year = yearProperty().get();
+                if (year != 0) {
+                    album.yearProperty().set(year);
+                }
+            }
+            if (album.coverProperty().get() == null) {
+                loadCover(id3v2);
+                if (getCover() != null) {
+                    album.coverProperty().set(getCover());
+                }
+            }
         }
 
-        Album album = data.getOrReturnAlbum(getAlbum(), albumArtist);
-
-        if (getCover() != null && album.coverProperty().get() == null) {
-            album.coverProperty().set(getCover());
-        }
-        if (getYear() != 0 && album.yearProperty().get() == 0) {
-            album.yearProperty().set(getYear());
-        }
-
-        if (!getAlbum().equals(UNKNOWN_ALBUM)) {
-            album.addSong(this);
-            data.registerAlbum(album);
-            artist.addAlbum(album);
-        }
-
-        data.registerArtist(artist);
+        album.addSong(this);
     }
 
-    @Override
-    public String toString() {
-        return getTitle() + " - " + getArtist();
+    public void delete() {
+        albumProperty().get().songsListProperty().remove(this);
+        albumProperty().set(null);
+
     }
 
     public Media getMedia() {
-        if (media == null) {
+        if (this.media == null) {
             this.media = new Media(file.toURI().toString());
         }
-
-        return media;
+        return this.media;
     }
 
     public String getTitle() {
         return title.get();
     }
 
-    public StringProperty titleProperty() {
-        return title;
-    }
-
-    public String getArtist() {
-        return artist.get();
-    }
-
-    public StringProperty artistProperty() {
-        return artist;
-    }
-
-    public String getAlbumArtist() {
-        return albumArtist.get();
-    }
-
-    public StringProperty albumArtistProperty() {
-        return albumArtist;
-    }
-
-    public String getAlbum() {
-        return album.get();
-    }
-
-    public StringProperty albumProperty() {
-        return album;
-    }
-
-    public String getGenre() {
-        return genre.get();
-    }
-
-    public StringProperty genreProperty() {
-        return genre;
-    }
-
     public Image getCover() {
         return cover.get();
-    }
-
-    public ObjectProperty<Image> coverProperty() {
-        return cover;
-    }
-
-    public String getDurationFormatted() {
-        return durationFormatted.get();
-    }
-
-    public StringProperty durationFormattedProperty() {
-        return durationFormatted;
-    }
-
-    public int getTrackNumber() {
-        return trackNumber.get();
-    }
-
-    public IntegerProperty trackNumberProperty() {
-        return trackNumber;
-    }
-
-    public int getYear() {
-        return year.get();
-    }
-
-    public IntegerProperty yearProperty() {
-        return year;
     }
 
     public Duration getDuration() {
         return duration.get();
     }
 
-    public ObjectProperty<Duration> durationProperty() {
-        return duration;
+    public StringProperty titleProperty() { return title; }
+    public IntegerProperty trackNumberProperty() { return trackNumber; }
+    public IntegerProperty yearProperty() { return year; }
+    public ObjectProperty<Artist> artistProperty() { return artist; }
+    public ObjectProperty<Artist> albumArtistProperty() { return albumArtist; }
+    public ObjectProperty<Album> albumProperty() { return album; }
+    public ObjectProperty<Image> coverProperty() { return cover; }
+    public ObjectProperty<Duration> durationProperty() { return duration; }
+
+    @Override
+    public String toString() {
+        return getTitle() + " - " + artistProperty().get().getName();
     }
 
     public static String[] EXTENSIONS = new String[]{"mp3"};
