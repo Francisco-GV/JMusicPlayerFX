@@ -49,14 +49,6 @@ public class Playlist {
         audioFiles.add(index, audioFile);
     }
 
-    public ObservableList<AudioFile> getShuffleList() {
-        ObservableList<AudioFile> shuffleList = FXCollections.observableList(audioFiles);
-
-        FXCollections.shuffle(shuffleList);
-
-        return shuffleList;
-    }
-
     @Override
     public String toString() {
         return name + ": " + audioFiles;

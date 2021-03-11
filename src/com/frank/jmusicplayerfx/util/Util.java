@@ -9,7 +9,6 @@ import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.SortedList;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
@@ -27,7 +26,6 @@ import javafx.util.Callback;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public final class Util {
@@ -96,6 +94,7 @@ public final class Util {
             }
         });
 
+        tableView.setFixedCellSize(40);
         tableView.setItems(playlist.getAudioFiles());
     }
 
