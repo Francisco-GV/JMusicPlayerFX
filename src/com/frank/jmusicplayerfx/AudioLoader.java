@@ -9,6 +9,7 @@ import javafx.collections.ObservableList;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.util.List;
 import java.util.Timer;
@@ -63,13 +64,17 @@ public class AudioLoader {
         search.apply(directory);
     }
 
-    public void addNewDirectory(File file) {
+    public Directory addNewDirectory(File file) {
         if (file.exists() && file.isDirectory()) {
             Directory newDirectory = new Directory(file.getAbsolutePath());
             if (!directories.contains(newDirectory)) {
                 directories.add(newDirectory);
+                System.out.println("The directory has been added successfully!");
             }
+            return newDirectory;
         }
+
+        return null;
     }
 
     @SuppressWarnings("unused")
@@ -81,7 +86,9 @@ public class AudioLoader {
         Function<Directory, Void> search = new Function<>() {
             @Override
             public Void apply(Directory dir) {
+                dir.getAudioList().forEach(AudioFile::delete);
                 allAudioList.removeAll(dir.getAudioList());
+
                 dir.getInnerDirectoriesList().forEach(this::apply);
                 dir.removeListListeners();
                 return null;
@@ -127,6 +134,10 @@ public class AudioLoader {
         return data;
     }
 
+    public ObservableList<Directory> getDirectories() {
+        return directories;
+    }
+
     public static class Directory {
         private final String path;
         private final ObservableList<AudioFile> audioList;
@@ -149,13 +160,19 @@ public class AudioLoader {
 
                 if (fileList != null) {
                     for (File file : fileList) {
-                        AudioFile audioFile = new AudioFile(file);
-                        audioList.add(audioFile);
-
+                        AudioFile audioFile;
                         try {
-                            Thread.sleep((long) (Math.random() * 150));
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            audioFile = new AudioFile(file);
+                            audioList.add(audioFile);
+
+                            try {
+                                Thread.sleep((long) (Math.random() * 150));
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                        } catch (FileNotFoundException ex) {
+                            ex.getStackTrace();
                         }
                     }
                 }
@@ -193,6 +210,10 @@ public class AudioLoader {
 
         @Override
         public String toString() {
+            return path;
+        }
+
+        public String getPath() {
             return path;
         }
 
